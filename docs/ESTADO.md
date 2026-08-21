@@ -15,6 +15,9 @@
 * `SUPABASE_URL`
 * `SUPABASE_ANON_KEY`
 * `SUPABASE_SERVICE_ROLE_KEY`
+* `SITE_URL`
+* `ADMIN_USER`
+* `ADMIN_PASS`
 * `KAPSO_API_KEY`
 * `KAPSO_PHONE_NUMBER_ID`
 * `KAPSO_WEBHOOK_SECRET`
@@ -37,6 +40,10 @@ Registra un pedido calificado en `pedidos_electronica`. Idempotente por
 * [ ] Crear proyecto Supabase + cargar env vars en Vercel + correr los SQL de `docs/sql/`.
 * [ ] Generar `KAPSO_WEBHOOK_SECRET` (Vercel + Kapso).
 * [ ] Sembrar `contactos_conocidos` con el export de contactos de Oscar.
-* [ ] **Integrar el frontend de Codex** (directorio B2C + panel de cobros B2B) sobre
-      esta arquitectura de datos. Pendiente: recibir su estructura de componentes y esquema.
+* [x] **Frontend de Codex portado a Next.js App Router**: portada B2C, buscador,
+      directorio seguro de locales y panel de cobros B2B sobre Supabase server-side.
+* [x] Protección HTTP Basic para `/gestion` y `/api/admin/*`; actualización de
+      cobros mediante `PATCH /api/admin/payments/[id]` con UUID opaco y Zod.
+* [ ] Integrar/mergear el PR de endpoints públicos (`GET /api/units` y
+      `POST /api/inquiries`) antes de validar el formulario en producción.
 * [ ] Armar el workflow de captura en Kapso (draft, número sandbox primero).
