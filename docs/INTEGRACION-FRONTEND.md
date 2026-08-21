@@ -45,14 +45,16 @@ Mapa para que Codex inyecte sus componentes React sin pisar la arquitectura limp
 | GET | `/api/admin/inquiries` | bandeja de consultas |
 | PATCH | `/api/admin/inquiries/[id]` | cambiar status (new→contacted→closed) |
 
-**Protección admin:** replicar el patrón de aycweb — Basic Auth vía middleware para
-`/admin/*` y `/api/admin/*` (`ADMIN_USER` / `ADMIN_PASS`). Los endpoints admin usan
-service role server-side. Todos con validación Zod (schemas en `lib/`).
+**Protección admin:** Supabase Auth con `@supabase/ssr`. `proxy.ts` refresca la
+sesión y protege `/gestion/*`, `/admin/*` y `/api/admin/*`; los Route Handlers
+también revalidan con `requireUser()`. Los endpoints usan service role únicamente
+después de autenticar la sesión y validan mutaciones con Zod.
 
 ## Estructura de archivos (dónde va cada cosa)
 ```
 app/(directorio)/...      páginas públicas B2C (Server Components leen units)
-app/admin/...             panel B2B (protegido)
+app/login/...             inicio de sesión por correo y contraseña
+app/gestion/...           panel B2B (protegido)
 app/api/units/            GET público
 app/api/inquiries/        POST público
 app/api/admin/...         endpoints admin (units, payments, inquiries)

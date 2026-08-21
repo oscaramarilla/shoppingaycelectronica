@@ -1,10 +1,5 @@
 // ============================================================
-// Proxy (ex-middleware) — protege /admin/* y /api/admin/* con Supabase Auth.
-// ------------------------------------------------------------
-// Refresca la sesión y bloquea el acceso sin usuario autenticado:
-//   - /api/admin/*  -> 401 JSON
-//   - /admin/*      -> redirect a /login
-// Es la PRIMERA línea de defensa; los endpoints revalidan igual.
+// Proxy (ex-middleware) — protege panel y APIs admin con Supabase Auth.
 // ============================================================
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
@@ -22,7 +17,6 @@ function deny(request: NextRequest) {
 export async function proxy(request: NextRequest) {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_ANON_KEY;
-  // Sin config de auth no se puede autenticar: se bloquea el área admin.
   if (!url || !anon) return deny(request);
 
   let response = NextResponse.next({ request });
@@ -51,5 +45,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/gestion/:path*', '/admin/:path*', '/api/admin/:path*'],
 };
