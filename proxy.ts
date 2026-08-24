@@ -1,0 +1,55 @@
+// ============================================================
+// Proxy (ex-middleware) — protege /admin/* y /api/admin/* con Supabase Auth.
+// ------------------------------------------------------------
+// Refresca la sesión y bloquea el acceso sin usuario autenticado:
+//   - /api/admin/*  -> 401 JSON
+//   - /admin/*      -> redirect a /login
+// Es la PRIMERA línea de defensa; los endpoints revalidan igual.
+// ============================================================
+
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+
+function deny(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+  }
+  const loginUrl = new URL('/login', request.nextUrl.origin);
+  loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+  return NextResponse.redirect(loginUrl);
+}
+
+export async function proxy(request: NextRequest) {
+  const url = process.env.SUPABASE_URL;
+  const anon = process.env.SUPABASE_ANON_KEY;
+  // Sin config de auth no se puede autenticar: se bloquea el área admin.
+  if (!url || !anon) return deny(request);
+
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(url, anon, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options),
+        );
+      },
+    },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return deny(request);
+  return response;
+}
+
+export const config = {
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
+};
