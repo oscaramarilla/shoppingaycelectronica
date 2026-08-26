@@ -1,0 +1,2 @@
+unit_code,public_business_name,slug,category,description,public_whatsapp,business_hours,location_hint,is_published
+PB-DEMO,Punto Móvil Demo,punto-movil-demo,Celulares,Ficha ilustrativa para validar el diseño,,Horario de muestra,Planta baja - ubicación ilustrativa,false

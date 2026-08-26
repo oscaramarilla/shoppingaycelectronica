@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import type { PublicUnit, UnitStatus } from "@/lib/domain/types";
+import { demoProfiles } from "@/lib/marketplace/demo";
 
 const editorialCategories = ["Celulares", "Informática", "Electrónica", "Servicio técnico"];
 
@@ -58,6 +59,15 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
       return categoryMatch && (!normalized || searchable.includes(normalized));
     });
   }, [category, query, units]);
+
+  const filteredProfiles = useMemo(() => {
+    const normalized = query.trim().toLocaleLowerCase("es");
+    return demoProfiles.filter((profile) => {
+      const categoryMatch = category === "Todo" || profile.category === category;
+      const searchable = `${profile.name} ${profile.category} ${profile.summary} ${profile.specialties.join(" ")}`.toLocaleLowerCase("es");
+      return categoryMatch && (!normalized || searchable.includes(normalized));
+    });
+  }, [category, query]);
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -141,6 +151,24 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
           </article>)}
           {units.length === 0 && <p className="empty-state">El directorio quedará visible cuando se carguen los locales en la base oficial.</p>}
           {units.length > 0 && filteredUnits.length === 0 && <p className="empty-state">No encontramos un local con esos filtros. Probá otra categoría o escribinos.</p>}
+        </div>
+      </section>
+
+      <section className="profiles-section" id="comercios">
+        <div className="demo-notice"><strong>Vista previa</strong><span>Estos tres perfiles son demostrativos y serán reemplazados por comercios reales autorizados.</span></div>
+        <div className="section-heading"><div><p className="section-kicker">Así se verá el marketplace</p><h2>Cada comercio tendrá<br />su <em>propio local digital.</em></h2></div><p>Productos, servicios, precios orientativos, ubicación y un contacto público separado de los datos privados del alquiler.</p></div>
+        <div className="profile-preview-grid">
+          {filteredProfiles.map((profile, index) => <article className="profile-preview-card" key={profile.slug}>
+            <div className={`profile-preview-art profile-preview-art-${index + 1}`}><span>DEMO</span><strong>{profile.unitCode}</strong><small>{profile.floor}</small></div>
+            <div className="profile-preview-body">
+              <span className="offer-tag">{profile.category}</span>
+              <h3>{profile.name}</h3>
+              <p>{profile.summary}</p>
+              <div>{profile.specialties.map((specialty) => <small key={specialty}>{specialty}</small>)}</div>
+              <a href={`/locales/${profile.slug}`}>Ver perfil de muestra <span>→</span></a>
+            </div>
+          </article>)}
+          {filteredProfiles.length === 0 && <p className="empty-state">No hay una ficha de demostración para esos filtros. Probá otra categoría.</p>}
         </div>
       </section>
 
