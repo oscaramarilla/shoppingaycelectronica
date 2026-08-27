@@ -9,7 +9,7 @@ export default function PaymentButton({ paymentId }: { paymentId: string }) {
   const router = useRouter();
 
   async function markPaid() {
-    if (!window.confirm("¿Confirmás que este alquiler fue pagado en efectivo?")) return;
+    if (!window.confirm("¿Confirmás que este cobro de alquiler + expensa fue pagado en efectivo?")) return;
     setSaving(true);
     setError(null);
     try {

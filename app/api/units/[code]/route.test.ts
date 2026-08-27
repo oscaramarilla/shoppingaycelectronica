@@ -31,7 +31,7 @@ beforeEach(() => {
 describe('GET /api/units/[code]', () => {
   it('local existente: 200 + unit con proyección segura', async () => {
     mockResult = {
-      data: { id: 'u1', code: 'A-12', floor: '1', status: 'occupied', tenant_name: 'Kiosco X', category: 'celulares' },
+      data: { id: 'u1', code: 'A-12', floor: '1', status: 'occupied', category: 'celulares' },
       error: null,
     };
     const res = await GET(req, ctx('A-12'));
@@ -40,7 +40,7 @@ describe('GET /api/units/[code]', () => {
     expect(body.ok).toBe(true);
     expect(body.unit.code).toBe('A-12');
     const cols = selectSpy.mock.calls[0][0] as string;
-    expect(cols).not.toMatch(/monthly_rent|due_day|phone/);
+    expect(cols).not.toMatch(/tenant_name|monthly_rent|due_day|phone/);
   });
 
   it('local inexistente: 404', async () => {

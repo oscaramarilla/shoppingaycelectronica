@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "data:validate:units": "node scripts/import-locales-reales.mjs --dry-run",
+    "data:import:units": "node scripts/import-locales-reales.mjs",
     "start": "next start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

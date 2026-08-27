@@ -18,9 +18,11 @@ export type PublicUnit = {
   code: string;
   floor: string;
   status: UnitStatus;
-  tenant_name: string | null;
   category: string | null;
 };
+
+export type RentalBeneficiary = "ayc" | "zully";
+export type RentalChannel = "directo" | "propisur" | null;
 
 export type AdminUnit = {
   id: string;
@@ -31,6 +33,9 @@ export type AdminUnit = {
   phone: string | null;
   category: string | null;
   monthlyRent: number;
+  expensa: number;
+  beneficiary: RentalBeneficiary;
+  rentalChannel: RentalChannel;
   dueDay: number;
 };
 
@@ -41,6 +46,10 @@ export type AdminPayment = {
   floor: string;
   tenantName: string | null;
   amount: number;
+  monthlyRent: number;
+  expensa: number;
+  beneficiary: RentalBeneficiary;
+  rentalChannel: RentalChannel;
   status: PaymentStatus;
   paidOn: string | null;
 };
@@ -58,6 +67,7 @@ export type AdminInquiry = {
 export type AdminDashboardData = {
   units: AdminUnit[];
   unitCounts: Record<UnitStatus, number>;
+  zullyPaymentCounts: Record<PaymentStatus, { total: number; amount: number }>;
   paymentCounts: Record<PaymentStatus, { total: number; amount: number }>;
   payments: AdminPayment[];
   inquiries: AdminInquiry[];

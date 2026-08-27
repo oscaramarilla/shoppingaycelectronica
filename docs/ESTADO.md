@@ -9,6 +9,13 @@
 ## 2. Últimas Actualizaciones Web (Handoffs de Extensiones Chrome)
 * **2026-08-24:** Backend público y administrativo integrado. El panel usa
   Supabase Auth (`@supabase/ssr`), pantalla `/login` y endpoints privados.
+* **2026-08-27:** Frontend ajustado al relevamiento real de la galería: 50
+  salones comerciales, 21 vacancias y tres niveles (PB + PA comerciales; 2do
+  piso administrativo). La proyección pública ya no expone `tenant_name`.
+  `/gestion` suma alquiler + expensa, separa los cobros cuyo beneficiario es
+  Zully y muestra el canal de alquiler. El CSV oficial se valida con
+  `npm run data:validate:units` y se importa, una vez disponible la conexión
+  server-side, con `npm run data:import:units`.
 
 ## 3. Variables de Entorno (.env.local — solo nombres, nunca valores)
 *(Server-side únicamente. Ninguna con prefijo `NEXT_PUBLIC_`.)*
@@ -45,7 +52,9 @@ Registra un pedido calificado en `pedidos_electronica`. Idempotente por
 
 ## 6. Tareas Pendientes (WIP)
 * [ ] Adquirir la línea nueva y conectarla a Kapso (API-only).
-* [ ] Crear proyecto Supabase + cargar env vars en Vercel + correr los SQL de `docs/sql/`.
+* [ ] Cargar las env vars de Supabase en el entorno de ejecución y correr
+      `docs/sql/units-galeria-fields.sql`; luego ejecutar
+      `npm run data:import:units` (upsert por `units.code`).
 * [ ] Generar `KAPSO_WEBHOOK_SECRET` (Vercel + Kapso).
 * [ ] Sembrar `contactos_conocidos` con el export de contactos de Oscar.
 * [x] **Frontend de Codex portado a Next.js App Router**: portada B2C, buscador,
@@ -53,4 +62,8 @@ Registra un pedido calificado en `pedidos_electronica`. Idempotente por
 * [x] Supabase Auth, login, cierre de sesión y protección de panel/APIs.
 * [x] Endpoints públicos (`GET /api/units`, `GET /api/units/[code]` y
       `POST /api/inquiries`) integrados en `main`.
+* [x] Privacidad pública reforzada: nombres legales, alquileres, expensas,
+      beneficiarios y teléfonos contractuales quedan fuera del directorio.
+* [ ] Cargar `business_profiles`, productos y fotos únicamente después del
+      relevamiento y autorización de cada comercio.
 * [ ] Armar el workflow de captura en Kapso (draft, número sandbox primero).

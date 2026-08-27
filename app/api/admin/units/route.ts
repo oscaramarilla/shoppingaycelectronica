@@ -8,7 +8,7 @@ import { unitCreateSchema } from '@/lib/admin/schemas';
 import { json } from '@/lib/http';
 
 const ADMIN_UNIT_COLUMNS =
-  'id, code, floor, status, tenant_name, phone, category, monthly_rent, due_day, created_at, updated_at';
+  'id, code, floor, status, tenant_name, phone, category, monthly_rent, expensa, beneficiario, canal_alquiler, due_day, created_at, updated_at';
 
 export async function GET() {
   const auth = await requireUser();

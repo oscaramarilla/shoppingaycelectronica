@@ -36,6 +36,11 @@ const emptyDashboard: AdminDashboardData = {
     due: { total: 0, amount: 0 },
     overdue: { total: 0, amount: 0 },
   },
+  zullyPaymentCounts: {
+    paid: { total: 0, amount: 0 },
+    due: { total: 0, amount: 0 },
+    overdue: { total: 0, amount: 0 },
+  },
   payments: [],
   inquiries: [],
 };
@@ -57,15 +62,21 @@ export default async function ManagementPage() {
     dashboardError = "No pudimos cargar los datos administrativos. Reintentá en unos minutos.";
   }
 
-  const { units, unitCounts, paymentCounts, payments, inquiries } = dashboard;
+  const { units, unitCounts, paymentCounts, zullyPaymentCounts, payments, inquiries } = dashboard;
   const totalUnits = Object.values(unitCounts).reduce((sum, count) => sum + count, 0);
   const expected = Object.values(paymentCounts).reduce((sum, row) => sum + row.amount, 0);
   const collected = paymentCounts.paid.amount;
   const collectionRate = expected ? Math.round((collected / expected) * 100) : 0;
+  const aycPayments = payments.filter((payment) => payment.beneficiary !== "zully");
+  const zullyPayments = payments.filter((payment) => payment.beneficiary === "zully");
+  const zullyExpected = Object.values(zullyPaymentCounts).reduce((sum, row) => sum + row.amount, 0);
+  const zullyUnits = units.filter((unit) => unit.beneficiary === "zully");
   const unitsWithPayment = new Set(payments.map((payment) => payment.unitId));
   const paymentCandidates: PaymentCandidate[] = units
-    .filter((unit) => unit.status === "occupied" && unit.monthlyRent > 0 && !unitsWithPayment.has(unit.id))
-    .map((unit) => ({ unitId: unit.id, code: unit.code, amount: unit.monthlyRent }));
+    .filter((unit) => unit.status === "occupied" && unit.monthlyRent + unit.expensa > 0 && !unitsWithPayment.has(unit.id))
+    .map((unit) => ({ unitId: unit.id, code: unit.code, amount: unit.monthlyRent + unit.expensa }));
+  const aycPaymentCandidates = paymentCandidates.filter((candidate) => units.find((unit) => unit.id === candidate.unitId)?.beneficiary !== "zully");
+  const zullyPaymentCandidates = paymentCandidates.filter((candidate) => units.find((unit) => unit.id === candidate.unitId)?.beneficiary === "zully");
 
   return (
     <main className="management-page">
@@ -101,41 +112,71 @@ export default async function ManagementPage() {
           <article><span>Recaudación del mes</span><strong>{money.format(collected)}</strong><small>{collectionRate}% de lo facturado</small></article>
           <article><span>Cobros pendientes</span><strong>{paymentCounts.due.total}</strong><small>{money.format(paymentCounts.due.amount)}</small></article>
           <article className="warning"><span>Cobros atrasados</span><strong>{paymentCounts.overdue.total}</strong><small>{money.format(paymentCounts.overdue.amount)}</small></article>
-          <article><span>Locales disponibles</span><strong>{unitCounts.available}</strong><small>de {totalUnits || 75} unidades</small></article>
+          <article><span>Salones disponibles</span><strong>{unitCounts.available}</strong><small>de {totalUnits || 50} salones comerciales</small></article>
         </section>
 
         <section className="dashboard-panel" id="cobros">
           <div className="panel-heading">
-            <div><span>Cartera del mes</span><h2>Estado de cobros</h2></div>
-            <GeneratePaymentsButton candidates={paymentCandidates} period={period} />
+            <div><span>Cartera del padre · AYC</span><h2>Alquiler + expensa</h2></div>
+            <GeneratePaymentsButton candidates={aycPaymentCandidates} period={period} />
           </div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>Local</th><th>Locatario</th><th>Alquiler</th><th>Estado</th><th>Fecha</th><th><span className="sr-only">Acciones</span></th></tr></thead>
-              <tbody>{payments.map((row) => (
+              <thead><tr><th>Salón</th><th>Locatario</th><th>Cobro total</th><th>Canal</th><th>Estado</th><th>Fecha</th><th><span className="sr-only">Acciones</span></th></tr></thead>
+              <tbody>{aycPayments.map((row) => (
                 <tr key={row.id}>
                   <td><strong>{row.code}</strong><small>{row.floor}</small></td>
                   <td>{row.tenantName ?? "—"}</td>
-                  <td>{money.format(row.amount)}</td>
+                  <td className="payment-breakdown"><strong>{money.format(row.amount)}</strong><small>{money.format(row.monthlyRent)} alquiler + {money.format(row.expensa)} expensa</small></td>
+                  <td><span className="channel-chip">{row.rentalChannel ?? "A confirmar"}</span></td>
                   <td><span className={`status-chip ${row.status}`}>{statusLabels[row.status]}</span></td>
                   <td>{row.paidOn ?? "—"}</td>
                   <td>{row.status !== "paid" && <PaymentButton paymentId={row.id} />}</td>
                 </tr>
               ))}</tbody>
             </table>
-            {payments.length === 0 && <p className="no-inquiries">No hay cobros registrados para {period}.</p>}
+            {aycPayments.length === 0 && <p className="no-inquiries">No hay cobros del padre registrados para {period}.</p>}
+          </div>
+        </section>
+
+        <section className="dashboard-panel beneficiary-panel" id="cobros-zully">
+          <div className="panel-heading">
+            <div><span>Informativo · {zullyUnits.length} salones · {money.format(zullyExpected)} · no suma al total del padre</span><h2>Salones cuyo alquiler recibe Zully</h2></div>
+            <GeneratePaymentsButton candidates={zullyPaymentCandidates} period={period} />
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Salón</th><th>Locatario</th><th>Cobro total</th><th>Canal</th><th>Estado</th><th>Fecha</th><th><span className="sr-only">Acciones</span></th></tr></thead>
+              <tbody>{zullyPayments.map((row) => (
+                <tr key={row.id}>
+                  <td><strong>{row.code}</strong><small>{row.floor}</small></td>
+                  <td>{row.tenantName ?? "—"}</td>
+                  <td className="payment-breakdown"><strong>{money.format(row.amount)}</strong><small>{money.format(row.monthlyRent)} alquiler + {money.format(row.expensa)} expensa</small></td>
+                  <td><span className="channel-chip">{row.rentalChannel ?? "A confirmar"}</span></td>
+                  <td><span className={`status-chip ${row.status}`}>{statusLabels[row.status]}</span></td>
+                  <td>{row.paidOn ?? "—"}</td>
+                  <td>{row.status !== "paid" && <PaymentButton paymentId={row.id} />}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+            {zullyPayments.length === 0 && <p className="no-inquiries">Los {zullyUnits.length} salones de Zully están separados de la cartera del padre. Sus importes aparecerán aquí cuando estén cargados.</p>}
           </div>
         </section>
 
         <div className="dashboard-columns">
           <section className="dashboard-panel" id="locales-admin">
-            <div className="panel-heading"><div><span>Ocupación</span><h2>Los 75 locales</h2></div></div>
+            <div className="panel-heading"><div><span>Ocupación comercial</span><h2>Los {totalUnits || 50} salones</h2></div></div>
             <div className="occupancy-bar"><span style={{ width: `${totalUnits ? (unitCounts.occupied / totalUnits) * 100 : 0}%` }} /></div>
             <div className="occupancy-grid">
               <p><strong>{unitCounts.occupied}</strong>Ocupados</p>
               <p><strong>{unitCounts.available}</strong>Disponibles</p>
               <p><strong>{unitCounts.reserved}</strong>Reservados</p>
               <p><strong>{unitCounts.maintenance}</strong>En ajuste</p>
+            </div>
+            <div className="channel-summary">
+              <span><strong>{units.filter((unit) => unit.rentalChannel === "directo").length}</strong> Directo</span>
+              <span><strong>{units.filter((unit) => unit.rentalChannel === "propisur").length}</strong> Propisur</span>
+              <span><strong>{units.filter((unit) => unit.rentalChannel === null).length}</strong> Por confirmar</span>
             </div>
           </section>
 

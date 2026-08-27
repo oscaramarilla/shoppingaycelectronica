@@ -31,7 +31,16 @@ function req(body?: unknown): Request {
   });
 }
 const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
-const VALID = { code: 'A-12', floor: '1', status: 'occupied', monthly_rent: 1500000, due_day: 10 };
+const VALID = {
+  code: 'A-12',
+  floor: '1',
+  status: 'occupied',
+  monthly_rent: 1500000,
+  expensa: 250000,
+  beneficiario: 'ayc',
+  canal_alquiler: 'directo',
+  due_day: 10,
+};
 
 beforeEach(() => {
   mockUser = { id: 'admin-1' };
@@ -62,7 +71,9 @@ describe('/api/admin/units', () => {
     const res = await POST(req(VALID));
     expect(res.status).toBe(201);
     expect((await res.json()).id).toBe('u1');
-    expect(opSpy).toHaveBeenCalledWith('insert', expect.objectContaining({ code: 'A-12' }));
+    expect(opSpy).toHaveBeenCalledWith('insert', expect.objectContaining({
+      code: 'A-12', expensa: 250000, beneficiario: 'ayc', canal_alquiler: 'directo',
+    }));
   });
   it('POST status inválido: 422', async () => {
     expect((await POST(req({ ...VALID, status: 'vendido' }))).status).toBe(422);

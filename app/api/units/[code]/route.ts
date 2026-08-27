@@ -1,8 +1,8 @@
 // ============================================================
 // GET /api/units/[code] — detalle público de un local
 // ------------------------------------------------------------
-// Misma proyección SEGURA que el listado (sin monthly_rent /
-// due_day / phone). Lectura server-side con service role.
+// Misma proyección SEGURA que el listado (sin tenant_name /
+// monthly_rent / due_day / phone). Lectura server-side con service role.
 // 404 si el `code` no existe.
 // ============================================================
 

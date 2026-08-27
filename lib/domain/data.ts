@@ -19,7 +19,7 @@ export async function getPublicUnits(): Promise<PublicUnit[]> {
 
   const { data, error } = await supabase
     .from("units")
-    .select("code,floor,status,tenant_name,category")
+    .select("code,floor,status,category")
     .order("code", { ascending: true });
 
   if (error) {
@@ -33,7 +33,6 @@ export async function getPublicUnits(): Promise<PublicUnit[]> {
       code: String(row.code),
       floor: String(row.floor),
       status: row.status,
-      tenant_name: typeof row.tenant_name === "string" ? row.tenant_name : null,
       category: typeof row.category === "string" ? row.category : null,
     } satisfies PublicUnit];
   });

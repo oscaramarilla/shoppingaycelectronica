@@ -1,7 +1,7 @@
 // ============================================================
 // GET /api/units — directorio público de locales
 // ------------------------------------------------------------
-// Proyección SEGURA (sin monthly_rent / due_day / phone). Lectura
+// Proyección SEGURA (sin tenant_name / monthly_rent / due_day / phone). Lectura
 // server-side con service role. Filtros: floor, status, category, q.
 // ============================================================
 
@@ -38,7 +38,9 @@ export async function GET(req: Request) {
   if (f.floor) query = query.eq('floor', f.floor);
   if (f.status) query = query.eq('status', f.status);
   if (f.category) query = query.eq('category', f.category);
-  if (f.q) query = query.ilike('tenant_name', `%${f.q}%`);
+  // Hasta que existan business_profiles autorizados, la búsqueda pública se
+  // limita al código del salón. El nombre legal jamás se consulta públicamente.
+  if (f.q) query = query.ilike('code', `%${f.q}%`);
 
   try {
     const { data, error } = await query.order('code', { ascending: true });

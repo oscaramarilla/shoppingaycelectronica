@@ -8,6 +8,8 @@ import type {
   AdminUnit,
   InquiryStatus,
   PaymentStatus,
+  RentalBeneficiary,
+  RentalChannel,
   UnitStatus,
 } from "@/lib/domain/types";
 
@@ -16,6 +18,8 @@ type JsonRecord = Record<string, unknown>;
 const unitStatuses = new Set<UnitStatus>(["occupied", "available", "reserved", "maintenance"]);
 const paymentStatuses = new Set<PaymentStatus>(["paid", "due", "overdue"]);
 const inquiryStatuses = new Set<InquiryStatus>(["new", "contacted", "closed"]);
+const rentalBeneficiaries = new Set<RentalBeneficiary>(["ayc", "zully"]);
+const rentalChannels = new Set<Exclude<RentalChannel, null>>(["directo", "propisur"]);
 
 export class AdminApiError extends Error {
   constructor(message: string, public readonly status: number) {
@@ -58,7 +62,12 @@ function toUnit(row: JsonRecord): AdminUnit | null {
   const status = String(row.status) as UnitStatus;
   if (!unitStatuses.has(status)) return null;
   const monthlyRent = Number(row.monthly_rent);
+  const expensa = Number(row.expensa);
   const dueDay = Number(row.due_day);
+  const beneficiaryCandidate = String(row.beneficiario ?? "ayc") as RentalBeneficiary;
+  const rentalChannelCandidate = row.canal_alquiler == null
+    ? null
+    : String(row.canal_alquiler) as Exclude<RentalChannel, null>;
   return {
     id: String(row.id),
     code: String(row.code),
@@ -68,6 +77,11 @@ function toUnit(row: JsonRecord): AdminUnit | null {
     phone: typeof row.phone === "string" ? row.phone : null,
     category: typeof row.category === "string" ? row.category : null,
     monthlyRent: Number.isFinite(monthlyRent) ? monthlyRent : 0,
+    expensa: Number.isFinite(expensa) ? expensa : 0,
+    beneficiary: rentalBeneficiaries.has(beneficiaryCandidate) ? beneficiaryCandidate : "ayc",
+    rentalChannel: rentalChannelCandidate && rentalChannels.has(rentalChannelCandidate)
+      ? rentalChannelCandidate
+      : null,
     dueDay: Number.isFinite(dueDay) ? dueDay : 10,
   };
 }
@@ -113,6 +127,11 @@ export async function getAdminDashboard(period: string): Promise<AdminDashboardD
     due: { total: 0, amount: 0 },
     overdue: { total: 0, amount: 0 },
   };
+  const zullyPaymentCounts: Record<PaymentStatus, { total: number; amount: number }> = {
+    paid: { total: 0, amount: 0 },
+    due: { total: 0, amount: 0 },
+    overdue: { total: 0, amount: 0 },
+  };
   const payments: AdminPayment[] = [];
   for (const row of paymentRows) {
     const status = String(row.status) as PaymentStatus;
@@ -121,8 +140,10 @@ export async function getAdminDashboard(period: string): Promise<AdminDashboardD
     const unit = unitsById.get(unitId);
     const amount = Number(row.amount);
     const normalizedAmount = Number.isFinite(amount) ? amount : 0;
-    paymentCounts[status].total += 1;
-    paymentCounts[status].amount += normalizedAmount;
+    const beneficiary = unit?.beneficiary ?? "ayc";
+    const targetCounts = beneficiary === "zully" ? zullyPaymentCounts : paymentCounts;
+    targetCounts[status].total += 1;
+    targetCounts[status].amount += normalizedAmount;
     payments.push({
       id: String(row.id),
       unitId,
@@ -130,6 +151,10 @@ export async function getAdminDashboard(period: string): Promise<AdminDashboardD
       floor: unit?.floor ?? "",
       tenantName: unit?.tenantName ?? null,
       amount: normalizedAmount,
+      monthlyRent: unit?.monthlyRent ?? 0,
+      expensa: unit?.expensa ?? 0,
+      beneficiary,
+      rentalChannel: unit?.rentalChannel ?? null,
       status,
       paidOn: typeof row.paid_on === "string" ? row.paid_on : null,
     });
@@ -143,5 +168,5 @@ export async function getAdminDashboard(period: string): Promise<AdminDashboardD
     return inquiry ? [inquiry] : [];
   });
 
-  return { units, unitCounts, paymentCounts, payments, inquiries };
+  return { units, unitCounts, paymentCounts, zullyPaymentCounts, payments, inquiries };
 }
