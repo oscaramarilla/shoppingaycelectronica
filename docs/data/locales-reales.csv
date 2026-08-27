@@ -1,0 +1,51 @@
+unit_code,floor,status,tenant_legal_name,monthly_rent_pyg,expensa_pyg,beneficiario,canal_alquiler,notas
+PB-01,Planta Baja,occupied,Raul Campuzano,1590000,250000,ayc,,
+PB-02,Planta Baja,occupied,Raul Samaniego,1545455,300000,ayc,,
+PB-BE,Planta Baja,occupied,Angel Samaniego,1318182,250000,ayc,,salon bajo escalera
+PB-04,Planta Baja,occupied,Jihad Ali,5345456,320000,ayc,,alquiler+expensa combinado de salones 4/7/8/12/13
+PB-05,Planta Baja,occupied,Ariel Armoa,1200000,250000,ayc,,
+PB-06,Planta Baja,occupied,Samuel Zapata,1409091,250000,ayc,,
+PB-07,Planta Baja,occupied,Jihad Ali,,,ayc,,combinado con PB-04
+PB-08,Planta Baja,occupied,Jihad Ali,,,ayc,,combinado con PB-04
+PB-09,Planta Baja,occupied,Victor Rotela,1136364,250000,ayc,,
+PB-10,Planta Baja,occupied,Zully,,,zully,,alquiler lo recibe Zully (herencia familiar); NO entra en cobros del padre
+PB-11,Planta Baja,available,,,,ayc,,DISPONIBLE
+PB-12,Planta Baja,occupied,Jihad Ali,,,ayc,,combinado con PB-04
+PB-13,Planta Baja,occupied,Jihad Ali,,,ayc,,combinado con PB-04
+PB-14,Planta Baja,occupied,Lorena Benitez,1050000,250000,ayc,,
+PB-15,Planta Baja,occupied,Ana Lopez,1036364,150000,ayc,,
+PB-16,Planta Baja,available,,,,ayc,,DISPONIBLE
+PB-17,Planta Baja,occupied,Zully,,,zully,,idem PB-10
+PB-18,Planta Baja,occupied,Hugo Bustos,840000,250000,ayc,,
+PB-19,Planta Baja,available,,,,ayc,,DISPONIBLE
+PB-20,Planta Baja,occupied,Zully,,,zully,,idem PB-10
+PB-21,Planta Baja,occupied,Zully,,,zully,,idem PB-10
+PB-22,Planta Baja,occupied,Zully,,,zully,,idem PB-10
+PB-23,Planta Baja,occupied,Zully,,,zully,,idem PB-10
+PB-24,Planta Baja,occupied,Federico Benitez,1545455,400000,ayc,,combinado de salones 24/25
+PB-25,Planta Baja,occupied,Federico Benitez,,,ayc,,combinado con PB-24
+PB-26,Planta Baja,available,,,,ayc,,DISPONIBLE
+PA-31,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-32,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-33,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-34,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-35,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-36,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-37,Planta Alta,occupied,Ruben Samudio,681818,250000,ayc,,
+PA-38,Planta Alta,occupied,Emilce Ocampo,525000,250000,ayc,,
+PA-39,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-40,Planta Alta,occupied,Guebara,1590909,250000,ayc,,combinado de salones 40/41
+PA-41,Planta Alta,occupied,Guebara,,,ayc,,combinado con PA-40
+PA-42,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-43,Planta Alta,occupied,Zully,,,zully,,idem PB-10
+PA-44,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-45,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-46,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-47,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-48,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-49,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-50,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-51,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-52,Planta Alta,available,,,,ayc,,DISPONIBLE
+PA-53,Planta Alta,occupied,Zully,,,zully,,combinado 53/54; idem PB-10
+PA-54,Planta Alta,occupied,Zully,,,zully,,combinado con PA-53
