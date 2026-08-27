@@ -16,6 +16,11 @@
   Zully y muestra el canal de alquiler. El CSV oficial se valida con
   `npm run data:validate:units` y se importa, una vez disponible la conexión
   server-side, con `npm run data:import:units`.
+* **2026-08-27:** Identidad pública actualizada a azul eléctrico y blanco. La
+  portada incorpora la fotografía real de la fachada, la ubicación oficial
+  `P92H+J7H, Mayor Fleitas esquina, Zona Mercado 4, Asunción 001224` y el
+  teléfono principal `0985 864209`, también incluidos en los datos
+  estructurados para buscadores.
 
 ## 3. Variables de Entorno (.env.local — solo nombres, nunca valores)
 *(Server-side únicamente. Ninguna con prefijo `NEXT_PUBLIC_`.)*
