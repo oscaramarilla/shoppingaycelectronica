@@ -48,8 +48,8 @@ h1 em::after { content: ""; position: absolute; height: 6px; background: var(--c
 .search-box button { align-self: stretch; border: 0; padding: 0 28px; background: var(--ink); color: white; text-transform: uppercase; font-size: 11px; font-weight: 900; letter-spacing: .12em; cursor: pointer; }
 .search-box button:hover { background: var(--orange-dark); }
 .category-row { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
-.category-row button { color: white; cursor: pointer; border: 1px solid rgba(255,255,255,.45); background: rgba(112, 25, 0, .08); padding: 9px 12px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.category-row button:hover { background: white; color: var(--orange-dark); }
+.category-row button, .category-row a { color: white; cursor: pointer; border: 1px solid rgba(255,255,255,.45); background: rgba(112, 25, 0, .08); padding: 9px 12px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.category-row button:hover, .category-row a:hover { background: white; color: var(--orange-dark); }
 .category-row span { font-size: 16px; }
 
 .building-card { background: var(--cream); color: var(--ink); padding: 20px; box-shadow: 18px 18px 0 rgba(111, 22, 0, .28); transform: rotate(1.2deg); }
@@ -166,6 +166,23 @@ h2 em { color: var(--orange); font-style: normal; }
 .primary-cta, .outline-cta { width: max-content; padding: 16px 19px; display: flex; gap: 25px; align-items: center; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
 .primary-cta { background: var(--orange); color: white; }
 .primary-cta:hover { background: var(--cream); color: var(--ink); }
+.availability-focus { align-items: start; gap: 6vw; }
+.availability-focus .rent-copy h2 strong { color: var(--orange); }
+.vacancy-board { display: grid; gap: 16px; }
+.vacancy-board article { padding: 25px; border: 1px solid rgba(255,255,255,.2); background: #172331; }
+.vacancy-board article.featured { border: 2px solid var(--orange); box-shadow: 14px 14px 0 rgba(255,87,34,.22); }
+.vacancy-board article > header { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+.vacancy-board article > header div { display: flex; align-items: center; gap: 14px; }
+.vacancy-board article > header div > span { width: 48px; height: 48px; display: grid; place-items: center; color: white; background: var(--orange); font-weight: 900; }
+.vacancy-board article > header strong { font-size: 18px; text-transform: uppercase; }
+.vacancy-board article > header p { margin: 0; display: flex; align-items: center; gap: 6px; color: #b9c2ca; font-size: 12px; }
+.vacancy-board article > header p b { color: var(--orange); font-size: 32px; }
+.vacancy-board article > header p small { display: block; color: #93a0aa; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.vacancy-board article > p { margin: 17px 0; color: #b9c2ca; font-size: 12px; line-height: 1.55; }
+.vacancy-codes { display: flex; flex-wrap: wrap; gap: 7px; }
+.vacancy-codes a { padding: 8px 9px; color: white; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.17); font-size: 10px; font-weight: 900; }
+.vacancy-codes a:hover { color: var(--ink); background: var(--orange); border-color: var(--orange); }
+.vacancy-note { color: #8f9ba5; font-size: 9px; line-height: 1.5; }
 .rent-levels { padding: 27px; border: 1px solid rgba(255,255,255,.18); background: #172331; transform: rotate(1deg); box-shadow: 18px 18px 0 var(--orange); }
 .rent-levels > div { min-height: 108px; padding: 22px; display: grid; grid-template-columns: 65px 1fr; align-content: center; border: 1px solid rgba(255,255,255,.23); margin-top: -1px; background: rgba(255,255,255,.03); }
 .rent-levels span { grid-row: 1 / 3; color: var(--orange); font-size: 28px; font-weight: 900; align-self: center; }
@@ -273,6 +290,13 @@ footer > p { color: #aab5bd; font-size: 13px; } footer > div { display: flex; ga
 .dashboard-panel td { padding: 14px 18px; border-top: 1px solid #e3ddd2; white-space: nowrap; }
 .dashboard-panel td:first-child strong, .dashboard-panel td:first-child small { display: block; }
 .dashboard-panel td:first-child small { color: var(--muted); margin-top: 3px; font-size: 9px; }
+.payment-breakdown strong, .payment-breakdown small { display: block; }
+.payment-breakdown small { margin-top: 4px; color: var(--muted); font-size: 8px; }
+.channel-chip { padding: 5px 8px; color: #3f5362; background: #e4ebef; font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
+.beneficiary-panel { border-top: 4px solid #7b61a8; }
+.channel-summary { padding: 0 25px 25px; display: flex; flex-wrap: wrap; gap: 8px; }
+.channel-summary span { padding: 8px 10px; color: var(--muted); background: #e9e4dc; font-size: 9px; text-transform: uppercase; }
+.channel-summary strong { color: var(--ink); }
 .status-chip { padding: 6px 9px; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
 .status-chip.paid { color: #167142; background: #dff5e9; }.status-chip.due { color: #765900; background: #fff0bd; }.status-chip.overdue { color: #a33118; background: #ffe0d8; }
 .payment-button { padding: 8px 10px; cursor: pointer; color: white; background: var(--ink); border: 0; font-size: 9px; font-weight: 900; text-transform: uppercase; }
@@ -301,6 +325,7 @@ footer > p { color: #aab5bd; font-size: 13px; } footer > div { display: flex; ga
   .profile-location-card { max-width: 560px; }
   .profile-contact { align-items: start; flex-direction: column; }
   .rent-section, .location-section, .contact-section { grid-template-columns: 1fr; }
+  .vacancy-board { max-width: 680px; width: 100%; }
   .faq-section { grid-template-columns: 1fr; }
   footer { grid-template-columns: 1fr 1fr; }
   .management-page { grid-template-columns: 1fr; }
@@ -353,6 +378,10 @@ footer > p { color: #aab5bd; font-size: 13px; } footer > div { display: flex; ga
   .profile-contact > a { width: 100%; min-width: 0; }
   .offer-art { height: 160px; }
   .rent-levels { padding: 14px; box-shadow: 9px 9px 0 var(--orange); transform: none; }
+  .vacancy-board article { padding: 18px; }
+  .vacancy-board article.featured { box-shadow: 8px 8px 0 rgba(255,87,34,.2); }
+  .vacancy-board article > header { align-items: start; flex-direction: column; }
+  .vacancy-board article > header p small { display: inline; margin-left: 3px; }
   .service-list { grid-template-columns: 1fr; }
   .service-list article { min-height: 210px; border-right: 0; border-bottom: 1px solid #d9d2c7; }
   .service-list h3 { margin-top: 35px; }

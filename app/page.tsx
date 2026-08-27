@@ -10,7 +10,7 @@ const structuredData = {
       "@type": "ShoppingCenter",
       name: "AYC Electrónica",
       description:
-        "Galería comercial de tecnología, electrónica y servicio técnico en el Mercado 4 de Asunción.",
+        "Galería de 50 salones comerciales en Planta Baja y Planta Alta del Mercado 4 de Asunción, con 21 espacios disponibles.",
       slogan: "Un rincón de CDE en Asunción",
       address: {
         "@type": "PostalAddress",

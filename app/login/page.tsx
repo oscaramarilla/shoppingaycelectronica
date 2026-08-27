@@ -36,9 +36,9 @@ export default async function LoginPage({
         <Link className="login-back" href="/">← Volver al sitio público</Link>
       </section>
       <aside className="login-aside" aria-hidden="true">
-        <div><span>75</span><strong>locales</strong></div>
-        <div><span>3</span><strong>niveles</strong></div>
-        <p>AYC / Mercado 4<br />Asunción · Paraguay</p>
+        <div><span>50</span><strong>salones comerciales</strong></div>
+        <div><span>21</span><strong>disponibles</strong></div>
+        <p>3 niveles reales<br />PB + PA comercial · 2do administración</p>
       </aside>
     </main>
   );

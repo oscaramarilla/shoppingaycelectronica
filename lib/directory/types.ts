@@ -9,12 +9,12 @@ export type UnitPublic = {
   code: string;
   floor: string;
   status: string;
-  tenant_name: string | null;
   category: string | null;
 };
 
 /**
  * Columnas seguras para la proyección pública de `units`.
- * NUNCA incluir monthly_rent, due_day ni phone (financiero / PII).
+ * NUNCA incluir tenant_name, monthly_rent, due_day ni phone (PII/financiero).
+ * El nombre público del comercio vendrá de business_profiles con autorización.
  */
-export const UNIT_PUBLIC_COLUMNS = 'id, code, floor, status, tenant_name, category';
+export const UNIT_PUBLIC_COLUMNS = 'id, code, floor, status, category';

@@ -17,6 +17,9 @@ export const unitCreateSchema = z.object({
   phone: z.string().trim().max(30).optional(),
   category: z.string().trim().max(100).optional(),
   monthly_rent: z.number().int().min(0).optional(),
+  expensa: z.number().int().min(0).optional(),
+  beneficiario: z.enum(['ayc', 'zully']).optional(),
+  canal_alquiler: z.enum(['directo', 'propisur']).nullable().optional(),
   due_day: z.number().int().min(1).max(31).optional(),
 });
 export const unitUpdateSchema = unitCreateSchema.partial();

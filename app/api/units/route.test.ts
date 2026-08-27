@@ -35,7 +35,7 @@ describe('GET /api/units', () => {
   it('devuelve units con la proyección segura (sin campos financieros/PII)', async () => {
     mockResult = {
       data: [
-        { id: 'u1', code: 'A-12', floor: '1', status: 'occupied', tenant_name: 'Kiosco X', category: 'celulares' },
+        { id: 'u1', code: 'A-12', floor: '1', status: 'occupied', category: 'celulares' },
       ],
       error: null,
     };
@@ -45,7 +45,7 @@ describe('GET /api/units', () => {
     expect(body.ok).toBe(true);
     expect(body.units).toHaveLength(1);
     const cols = selectSpy.mock.calls[0][0] as string;
-    expect(cols).not.toMatch(/monthly_rent|due_day|phone/);
+    expect(cols).not.toMatch(/tenant_name|monthly_rent|due_day|phone/);
     expect(cols).toContain('code');
   });
 
