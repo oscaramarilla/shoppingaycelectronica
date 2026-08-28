@@ -68,6 +68,23 @@ describe('POST /api/integrations/kapso/pedidos', () => {
     expect((row as { estado: string }).estado).toBe('nuevo');
   });
 
+  it('acepta null en campos opcionales (el LLM emite null para lo que no dijeron): 200', async () => {
+    const body = {
+      ...VALID_BODY,
+      nombre: null,
+      marcaModelo: null,
+      cantidad: null,
+      urgencia: null,
+      entrega: null,
+      resumen: null,
+    };
+    const res = await POST(makeReq(body, SECRET));
+    expect(res.status).toBe(200);
+    const [row] = upsertSpy.mock.calls[0];
+    expect((row as { marca_modelo: unknown }).marca_modelo).toBeNull();
+    expect((row as { cantidad: unknown }).cantidad).toBeNull();
+  });
+
   it('secreto incorrecto: 401 y no toca Supabase', async () => {
     const res = await POST(makeReq(VALID_BODY, 'wrong'));
     expect(res.status).toBe(401);
