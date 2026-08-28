@@ -54,7 +54,7 @@ create table if not exists public.units (
   tenant_name   text,
   phone         text,
   category      text,
-  monthly_rent  integer not null default 0,         -- guaraníes
+  monthly_rent  integer,                             -- guaraníes; NULL = sin alquiler propio (vacante / combinado en el salón principal / lo cobra Zully). NO usar 0 (0 = "gratis").
   due_day       integer not null default 10 check (due_day between 1 and 31),
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
