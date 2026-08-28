@@ -4,8 +4,11 @@ Marketplace de electrónica (AYC Electrónica S.R.L. · Mercado 4) con **WhatsAp
 automático** y catálogo optimizado para **SEO + GEO**. Objetivo de mediano plazo:
 **productizarlo como SaaS** para otros centros comerciales.
 
-> Documento vivo. Es la "torre de control" del proyecto (ver `docs/ESTADO.md`).
-> Todo agente/LLM lee esto y `AGENTS.md` antes de tocar nada.
+> Documento vivo de **visión y fases**. La **torre de control** (estado real de
+> producción) es `docs/ESTADO.md` — si algo acá difiere de la realidad, manda ESTADO.
+> ⚠️ **Realidad hoy:** el número de WhatsApp es **Coexistence** sobre la línea
+> personal de Oscar; la "línea dedicada API-only" de más abajo es el **plan**, aún
+> no existe. Todo agente/LLM lee esto y `AGENTS.md` antes de tocar nada.
 
 ---
 

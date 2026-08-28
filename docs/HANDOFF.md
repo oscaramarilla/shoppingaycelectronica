@@ -3,7 +3,7 @@
 > **Lectura obligatoria para cualquier agente o desarrollador nuevo.** Este
 > documento dice "en qué piso del edificio estamos". Complementa `AGENTS.md`
 > (reglas), `docs/PLAN.md` (visión), `docs/DEPLOY.md` (deploy) y `docs/ESTADO.md`
-> (torre de control). Última actualización: **2026-08-26**.
+> (torre de control). Última actualización: **2026-08-28 — SITIO EN VIVO**.
 
 ## 1. Qué es el proyecto
 Un sitio con **dos caras**:
@@ -37,8 +37,11 @@ promueven entre sí).
    endpoints (`/api/...`). La lógica y los datos son nuestros, no del vendor.
 2. **Separación de privacidad:**
    - `units` = **privado** (alquiler, vencimiento, inquilino legal, teléfono
-     privado) → solo admin.
+     privado) → solo admin. *(Hoy `units` está desnormalizada; el modelo
+     relacional de Fase 1 lo separa — ver `ESTADO.md` §7 y
+     `docs/sql/business-profiles-schema.sql`.)*
    - `business_profiles` = **público** (marca, WhatsApp público, catálogo).
+     Es una tabla **propuesta** en Fase 1, todavía no existe en la base.
    - Ningún endpoint público expone alquiler, teléfono privado ni nombre legal
      (proyecciones "seguras", ver `lib/directory/types.ts`).
 3. **Auth:** Supabase Auth (`@supabase/ssr`). `proxy.ts` protege `/gestion/*`,
@@ -49,7 +52,7 @@ promueven entre sí).
 6. **Disciplina:** un feature = una rama = un PR = un agente. Tests con Vitest +
    `npm run build` en verde como puerta antes de cada merge. Nunca `git add -A`.
 
-## 5. Qué se construyó (PRs #1–#9, todos mergeados a `main`)
+## 5. Qué se construyó (PRs #1–#17, todos mergeados a `main`)
 | PR | Qué |
 |---|---|
 | #1 | Scaffold Next.js + endpoints Kapso (`contacts/check`, `pedidos`) + tablas + `AGENTS.md` |
@@ -61,41 +64,47 @@ promueven entre sí).
 | #7 | Frontend de Codex (marketplace + `/gestion` + `/login`) |
 | #8 | Runbook de deploy (`docs/DEPLOY.md`) |
 | #9 | Marketplace con perfiles **demo** + `/locales/[slug]` + modelo `business_profiles` + plantillas CSV |
+| #10 | Este HANDOFF |
+| #11–#13 | Galería real (50 salones) + fix de privacidad (`tenant_name` fuera de la proyección pública) + identidad azul eléctrico |
+| #14 | `units.monthly_rent` **nullable** (el seed pasa NULL; `not null default 0` rebotaba con 23502) |
+| #15 | `pedidoSchema` `.nullish()` (el LLM emite `null`; `.optional()` lo rechazaba con 422) |
+| #16 | Doc: Zully tiene **9** salones, no 8 |
+| #17 | Endpoint `POST /api/integrations/kapso/inquiries` (alquiler / comerciante) |
 
-## 6. Estado actual (la foto)
+## 6. Estado actual (la foto) — EN VIVO
 | Componente | Estado |
 |---|---|
-| Dominio + HTTPS | ✅ Vivo |
-| Frontend desplegado | ✅ Marketplace visible; **concepto validado por el dueño** |
-| Supabase (proyecto) | ✅ Creado, Healthy, São Paulo (`ref rkjxrnjlynslkohvltkc`) |
-| **Migraciones (4 SQL)** | ⏳ **Sin correr** (a correr en SQL Editor) |
-| **Env vars en Vercel** | ⏳ Sin cargar |
-| Auto-RLS trigger | ⏳ Aprobado, a correr |
-| Integración GitHub de Supabase | ⚠️ Apunta al repo equivocado (`aycelectronica`) → **desconectar** |
-| Redeploy | ⏳ Después de env vars |
-| Usuarios admin | ⏳ Los crea Oscar en Supabase Auth |
+| Dominio + HTTPS | ✅ Vivo (`www.shoppingaycelectronica.com`) |
+| Sitio público | ✅ **En producción, leyendo la base**; concepto validado por el dueño |
+| Supabase (proyecto) | ✅ São Paulo (`ref rkjxrnjlynslkohvltkc`) |
+| Migraciones + auto-RLS | ✅ **Corridas y verificadas** |
+| Env vars en Vercel | ✅ **Cargadas** (`ANON`/`SERVICE_ROLE` las pegó Oscar) |
+| Auth URL Config (Supabase) | ✅ Site URL = dominio real (era `localhost:3000`) |
+| Datos reales (`units`) | ✅ **50 salones** (26 PB + 24 PA, 21 libres) |
+| Redeploy | ✅ Ready en Production |
+| Usuario admin | ✅ Creado (`aycfam@gmail.com`) |
+| Bot de WhatsApp (Kapso) | ⛔ **Apagado** — 3 prerrequisitos (ver `ESTADO.md` §6) |
 
-> El sitio está online y el concepto validado, pero **el panel aún no funciona de
-> verdad** hasta conectar la base (migraciones + llaves + redeploy).
+> El sitio está **vivo y funcionando de verdad**: el panel `/gestion` lee cobros
+> reales (₲ 24.484.094/mes) y el directorio público muestra los 50 salones. Ver
+> el detalle exacto de producción en **`docs/ESTADO.md`** (fuente de verdad).
 
-## 7. Pendiente para cerrar el deploy (HOY)
-1. Correr el **event trigger de auto-RLS** + las **4 migraciones** (orden: lo único
-   que importa es `directorio-cobros.sql` **antes** de `status-constraints.sql`).
-2. Cargar **env vars** en Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `KAPSO_WEBHOOK_SECRET`.
-3. **Desconectar** la integración GitHub de Supabase (repo equivocado).
-4. **Redeploy** sin caché.
-5. Crear **usuarios admin** (Supabase → Authentication → Users → Add user, con
-   "Auto Confirm").
-6. Validar `/gestion` en vivo.
+## 7. Deploy CERRADO — qué sigue
+El deploy quedó terminado (llaves + migraciones + redeploy + usuario admin). Lo
+pendiente ahora, sin apuro (nada bloquea el sitio):
+1. **(Oscar)** Generar los cobros de agosto en `/gestion` y crear usuarios para
+   el padre + secretarias.
+2. **(Revisión)** Aprobar el modelo relacional de Fase 1
+   (`docs/sql/business-profiles-schema.sql`) → backfill → cutover del frontend.
+3. **(Deploy)** Correr `docs/sql/inquiries-kapso-idem.sql` para el endpoint
+   `/inquiries` (cuando se arme el bot).
+4. **(Bot)** Los 3 prerrequisitos de Kapso y el ruteo de webhooks.
 
-## 8. Pendiente para MAÑANA (datos reales)
-- Llenar las 4 plantillas CSV de `docs/` (`locales-inquilinos`, `perfiles-comerciales`,
-  `ofertas`, `fotos`).
-- Crear tablas nuevas (`business_profiles`, `catalog_items`, `profile_photos`,
-  `leads`), mapear por `unit_code`, subir fotos a Supabase Storage, armar
-  `/locales/[slug]` reales, sacar la data demo (sin dejar contenido ficticio indexado).
-- Sección **"AYC Empresas"** con links UTM a los 4 dominios.
+## 8. Datos reales de comercios (tras relevamiento)
+- Cargar `business_profiles`, productos y fotos **solo** con autorización de cada
+  comercio (relevamiento inquilino por inquilino).
+- `/locales/[slug]` reales; sacar cualquier data demo (sin contenido ficticio indexado).
+- Sección **"AYC Empresas"** con links UTM a los 4 dominios del ecosistema.
 
 ## 9. Decisiones clave
 - **Modelo B**; agente conversacional futuro con **Groq + API de Meta** en nuestra app.

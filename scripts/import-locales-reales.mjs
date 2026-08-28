@@ -93,7 +93,10 @@ const units = source.map((row) => {
     floor: row.floor,
     status: row.status,
     tenant_name: row.tenant_legal_name || null,
-    monthly_rent: integerOrZero(row.monthly_rent_pyg, "monthly_rent_pyg", row.unit_code),
+    // monthly_rent vacío = NULL (sin alquiler propio: vacante / combinado en el
+    // salón principal / lo cobra Zully). NO 0 — 0 significaría "gratis" y
+    // sobreescribiría los NULL correctos de producción si se re-corriera el import.
+    monthly_rent: nullableInteger(row.monthly_rent_pyg, "monthly_rent_pyg", row.unit_code),
     expensa: nullableInteger(row.expensa_pyg, "expensa_pyg", row.unit_code),
     beneficiario: row.beneficiario,
     canal_alquiler: row.canal_alquiler || null,
