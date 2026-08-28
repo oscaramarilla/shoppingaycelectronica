@@ -16,7 +16,7 @@
 `canal_alquiler` (nuevo) · `notas`.
 
 ## 3. Reglas de negocio (confirmadas por Oscar)
-- **Zully (tía de Oscar):** sus 8 salones (PB-10/17/20/21/22/23, PA-43/53/54) están ocupados pero **el alquiler lo recibe ELLA** (herencia familiar del abuelo). `beneficiario='zully'` → **excluir de los cobros del padre**.
+- **Zully (tía de Oscar):** sus **9** salones (PB-10/17/20/21/22/23 = 6, PA-43/53/54 = 3) están ocupados pero **el alquiler lo recibe ELLA** (herencia familiar del abuelo). `beneficiario='zully'` → **excluir de los cobros del padre**.
 - **Propisur:** inmobiliaria; algunos salones se alquilan por ese canal (y les consigue clientes). `canal_alquiler` = `directo` o `propisur`. **Hoy está vacío: la secretaria debe etiquetarlo por salón.**
 - **Multi-salón:** un negocio ocupa varios salones (Jihad Ali 5, Federico 2, Guebara 2). El alquiler+expensa combinado se cargó en el primer salón (ej. PB-04) con nota; los demás quedan en blanco con nota "combinado con …".
 - **Alquiler + Expensa** son dos conceptos que se cobran por separado.
