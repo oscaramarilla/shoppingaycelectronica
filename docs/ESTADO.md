@@ -1,74 +1,154 @@
-# Estado Actual de shoppingaycelectronica y Torre de Control
+# Estado Actual de shoppingaycelectronica — Torre de Control
+
+> **Fuente de verdad operativa. Última actualización: 2026-08-28.**
+> Refleja la realidad EXACTA de producción. Si algo acá contradice a otro doc,
+> manda este. Todo agente/LLM lee esto y `AGENTS.md` antes de tocar nada.
+
+## 0. Titular
+
+**EL SITIO ESTÁ EN VIVO Y LEYENDO LA BASE REAL.**
+`https://www.shoppingaycelectronica.com` — deploy Ready en Production (Vercel),
+conectado a Supabase, con los **50 salones reales** cargados. Concepto validado
+por el padre de Oscar. El **panel `/gestion` funciona** (usuario admin creado).
+El **bot de WhatsApp NO está encendido** (ver §6, freno de mano).
 
 ## 1. Infraestructura Activa
-* **Frontend/Backend:** Vercel (Next.js) — repo separado de AYCweb.
-* **Base de Datos:** Supabase (proyecto PROPIO, separado).
-* **WhatsApp:** Kapso, número **dedicado API-only** (no coexistencia).
-* **Objetivo:** productizable como SaaS para otros shoppings.
 
-## 2. Últimas Actualizaciones Web (Handoffs de Extensiones Chrome)
-* **2026-08-24:** Backend público y administrativo integrado. El panel usa
-  Supabase Auth (`@supabase/ssr`), pantalla `/login` y endpoints privados.
-* **2026-08-27:** Frontend ajustado al relevamiento real de la galería: 50
-  salones comerciales, 21 vacancias y tres niveles (PB + PA comerciales; 2do
-  piso administrativo). La proyección pública ya no expone `tenant_name`.
-  `/gestion` suma alquiler + expensa, separa los cobros cuyo beneficiario es
-  Zully y muestra el canal de alquiler. El CSV oficial se valida con
-  `npm run data:validate:units` y se importa, una vez disponible la conexión
-  server-side, con `npm run data:import:units`.
-* **2026-08-27:** Identidad pública actualizada a azul eléctrico y blanco. La
-  portada incorpora la fotografía real de la fachada, la ubicación oficial
-  `P92H+J7H, Mayor Fleitas esquina, Zona Mercado 4, Asunción 001224` y el
-  teléfono principal `0985 864209`, también incluidos en los datos
-  estructurados para buscadores.
+* **Frontend/Backend:** Next.js (App Router) en **Vercel**, repo separado de AYCweb.
+* **Base de datos + Auth:** **Supabase** propio (proyecto `rkjxrnjlynslkohvltkc`,
+  región São Paulo). RLS activo en todas las tablas + **event trigger de auto-RLS**
+  para tablas futuras. 0 políticas = deny-anon; solo `service_role` pasa (intencional).
+* **Dominio:** `www.shoppingaycelectronica.com` (Squarespace → DNS a Vercel), HTTPS.
+* **WhatsApp:** Kapso. ⚠️ **Realidad hoy: conexión Coexistence** sobre el número
+  personal de Oscar `+595 985 864209` (el mismo tráfico personal/comercial). El
+  **plan** es una línea dedicada API-only, pero **todavía no existe**. Ver §6.
+* **Objetivo de mediano plazo:** productizable como SaaS para otros shoppings.
 
-## 3. Variables de Entorno (.env.local — solo nombres, nunca valores)
+## 2. Estado por componente (la foto)
+
+| Componente | Estado |
+|---|---|
+| Dominio + HTTPS | ✅ Vivo |
+| Sitio público (directorio, 50 salones, GEO) | ✅ En producción, leyendo la base |
+| Supabase (migraciones, RLS, auto-RLS) | ✅ Corridas y verificadas |
+| Env vars en Vercel (5) | ✅ Cargadas (`ANON`/`SERVICE_ROLE` las pegó Oscar) |
+| Supabase Auth URL Config | ✅ Site URL = dominio real (era `localhost:3000`) |
+| Datos reales (`units`) | ✅ 50 salones (26 PB + 24 PA, 21 libres) |
+| Panel `/gestion` | ✅ Vivo; usuario admin `aycfam@gmail.com` creado |
+| Identidad visual | ✅ Azul eléctrico + fachada + dirección + teléfono |
+| Bot de WhatsApp (Kapso) | ⛔ **Apagado** — faltan 3 prerrequisitos (§6) |
+| Modelo relacional Fase 1 | 📐 Propuesto (`business-profiles-schema.sql`), sin ejecutar |
+
+## 3. Cómo se cargaron los datos reales (IMPORTANTE)
+
+Los 50 salones se sembraron con un **`INSERT` SQL manual** en el SQL Editor, que
+usa **`NULL`** para el alquiler sin cargar (salones vacantes, agrupados en el
+principal, y los de Zully). **`monthly_rent` es NULLABLE** (PR #14) — un `NULL`
+significa "sin alquiler propio", nunca 0.
+
+⚠️ **El script `scripts/import-locales-reales.mjs` (`npm run data:import:units`)
+NO fue el que cargó producción.** Hasta este PR tenía un bug (`monthly_rent`
+usaba `integerOrZero` → convertía vacíos en 0); si se corría, sobrescribía los
+`NULL` correctos con `0`. Ya se corrigió a `nullableInteger`. Aun así, es una
+herramienta legacy: producción se maneja por SQL, y el modelo va hacia
+`occupancies` (§7), donde el alquiler ni vive en `units`.
+
+**Números de referencia (verificados contra el CSV y la base):**
+| Concepto | Valor |
+|---|---|
+| Salones totales / disponibles | 50 / 21 |
+| Zully (cartera aparte) | 9 |
+| Ocupados AYC con alquiler cargado | 14 |
+| Ocupados AYC agrupados (`monthly_rent` NULL) | 6 |
+| Total cobros AYC / mes (alquiler + expensa) | **₲ 24.484.094** |
+
+## 4. Variables de Entorno (Vercel — solo nombres, nunca valores)
+
 *(Server-side únicamente. Ninguna con prefijo `NEXT_PUBLIC_`.)*
-* `SUPABASE_URL`
-* `SUPABASE_ANON_KEY`
-* `SUPABASE_SERVICE_ROLE_KEY`
-* `SITE_URL`
-* `KAPSO_API_KEY`
-* `KAPSO_PHONE_NUMBER_ID`
-* `KAPSO_WEBHOOK_SECRET`
+* `SUPABASE_URL` ✅ · `SUPABASE_ANON_KEY` ✅ · `SUPABASE_SERVICE_ROLE_KEY` ✅
+* `SITE_URL` ✅ (`https://www.shoppingaycelectronica.com`)
+* `KAPSO_WEBHOOK_SECRET` ⚠️ creada **vacía** (no la necesita el sitio/panel; sí
+  el webhook del bot cuando se arme — mismo valor en Kapso y Vercel).
+* `KAPSO_API_KEY`, `KAPSO_PHONE_NUMBER_ID` — para cuando se cablee Kapso.
 
-## 4. Contrato de los Webhooks (Kapso → App)
-Auth en ambos: header `x-kapso-webhook-secret` == `KAPSO_WEBHOOK_SECRET` (timing-safe).
+## 5. Contrato de los Webhooks (Kapso → App)
 
-### `POST /api/integrations/kapso/contacts/check`
-Body `{ whatsapp }` → `{ ok, known }`. Consulta `contactos_conocidos`.
-**Fail-open:** si Supabase no está disponible, devuelve `known:false` (el bot
-engancha al prospecto). El número se normaliza antes de comparar.
+Auth en todos: header `x-kapso-webhook-secret` == `KAPSO_WEBHOOK_SECRET` (timing-safe).
+Idempotencia por `(source, conversation_id, message_id)`. `conversationId`/`messageId`
+los inyecta el envelope de Kapso (el LLM no los conoce). Ver `lib/integrations/kapso/schemas.ts`.
 
-### `POST /api/integrations/kapso/pedidos`
-Registra un pedido calificado en `pedidos_electronica`. Idempotente por
-`(source, conversation_id, message_id)`. Requeridos: `whatsapp`, `producto`,
-`conversationId`, `messageId`. Ver `lib/integrations/kapso/schemas.ts`.
+| Ruta | Qué | Campos clave |
+|---|---|---|
+| `POST /api/integrations/kapso/contacts/check` | allow-list; fail-open | `{ whatsapp } → { known }` |
+| `POST /api/integrations/kapso/pedidos` | consulta de **producto** → `pedidos_electronica` | `whatsapp, producto, conversationId, messageId` (req.) |
+| `POST /api/integrations/kapso/inquiries` | consulta de **alquiler / comerciante** → `inquiries` (PR #17) | `whatsapp, kind, resumen, conversationId, messageId` (req.); rechaza `producto` con 422 |
 
-## 5. Acceso y contrato administrativo
-* `/login`: correo + contraseña de Supabase Auth; la sesión se guarda en cookies
-  `httpOnly` administradas por `@supabase/ssr`.
-* `proxy.ts`: protege `/gestion/*`, `/admin/*` y `/api/admin/*`.
-* El panel consulta únicamente `GET /api/admin/units`,
-  `GET /api/admin/payments?period=YYYY-MM` y
-  `GET /api/admin/inquiries?status=new`.
-* Mutaciones conectadas: `POST /api/admin/payments` (upsert mensual),
-  `PATCH /api/admin/payments/[id]` y `PATCH /api/admin/inquiries/[id]`.
+**Ruteo del bot:** producto → `/pedidos`; alquiler o comerciante → `/inquiries`.
+Campos opcionales `.nullish()` (el LLM emite `null` para lo que no capturó).
 
-## 6. Tareas Pendientes (WIP)
-* [ ] Adquirir la línea nueva y conectarla a Kapso (API-only).
-* [ ] Cargar las env vars de Supabase en el entorno de ejecución y correr
-      `docs/sql/units-galeria-fields.sql`; luego ejecutar
-      `npm run data:import:units` (upsert por `units.code`).
-* [ ] Generar `KAPSO_WEBHOOK_SECRET` (Vercel + Kapso).
-* [ ] Sembrar `contactos_conocidos` con el export de contactos de Oscar.
-* [x] **Frontend de Codex portado a Next.js App Router**: portada B2C, buscador,
-      directorio seguro de locales y panel B2B conectado a los endpoints oficiales.
-* [x] Supabase Auth, login, cierre de sesión y protección de panel/APIs.
-* [x] Endpoints públicos (`GET /api/units`, `GET /api/units/[code]` y
-      `POST /api/inquiries`) integrados en `main`.
-* [x] Privacidad pública reforzada: nombres legales, alquileres, expensas,
-      beneficiarios y teléfonos contractuales quedan fuera del directorio.
-* [ ] Cargar `business_profiles`, productos y fotos únicamente después del
-      relevamiento y autorización de cada comercio.
-* [ ] Armar el workflow de captura en Kapso (draft, número sandbox primero).
+## 6. Bot de WhatsApp — apagado, con FRENO DE MANO
+
+**No encender hasta cumplir los 3 prerrequisitos.** El artifact del prompt está
+listo y verificado contra el código (contrato de salida en camelCase).
+
+1. **Allow-list vacía + Coexistence = le contesta a tu familia.** El bot
+   auto-responde a quien **no** esté en `contactos_conocidos`; hoy esa tabla
+   tiene 0 filas y el número es el personal de Oscar. Cargar los contactos
+   conocidos (familia, clientes) **antes** de encender.
+2. **Agente real, no sandbox.** El número está atado a un agente Sandbox; el
+   proyecto Kapso muestra "No agents yet". Crear el agente real antes de pegar
+   el prompt, o se edita el sandbox.
+3. **Webhook + secret.** Configurar el/los webhook(s) a los endpoints de §5 con
+   el header `x-kapso-webhook-secret` = `KAPSO_WEBHOOK_SECRET` (generar el valor
+   con `openssl rand -hex 32`, mismo valor en Kapso y Vercel).
+
+## 7. Modelo de datos — hoy y hacia dónde va
+
+**Hoy:** `units` está **desnormalizada** (mezcla salón físico + inquilino +
+alquiler + beneficiario). Los negocios con varios salones se modelan cargando el
+alquiler en el salón principal y NULLeando el resto. Funciona, pero acopla lo
+físico con lo comercial/contable.
+
+**Fase 1 (propuesto, sin ejecutar — `docs/sql/business-profiles-schema.sql`):**
+normalizar en `billing_accounts` (quién cobra: AYC / Zully), `occupancies`
+(el contrato: el alquiler vive acá, una vez), `occupancy_units` (un contrato →
+N salones) y `business_profiles` (marca pública, separada del nombre legal). El
+alquiler sale de `units` → **el problema NULL/0 desaparece**. Ver el plan de
+migración (aditivo → backfill → cutover del frontend → limpieza) en ese archivo.
+
+## 8. Acceso y contrato administrativo
+
+* `/login`: correo + contraseña de Supabase Auth; sesión en cookies `httpOnly`
+  vía `@supabase/ssr`. Cualquier usuario autenticado = admin total (roles
+  cobrador/admin = fase futura).
+* `proxy.ts` protege `/gestion/*`, `/admin/*`, `/api/admin/*`; los Route Handlers
+  revalidan con `requireUser()`.
+* El panel consulta `GET /api/admin/units`, `GET /api/admin/payments?period=YYYY-MM`,
+  `GET /api/admin/inquiries?status=new`; muta con `POST /api/admin/payments`
+  (upsert mensual), `PATCH /api/admin/payments/[id]`, `PATCH /api/admin/inquiries/[id]`.
+* **Cobros = alquiler + expensa**; Zully excluida del total del padre; vista de
+  vacancias (21) para el embudo "Quiero alquilar".
+
+## 9. Historia (PRs mergeados a `main`)
+
+`#1`–`#6` backend (endpoints Kapso, esquema units/payments/inquiries, auth admin)
+· `#7` frontend de Codex · `#8` runbook de deploy · `#9` perfiles demo + modelo
+· `#10` HANDOFF · `#11`–`#13` galería real + privacidad + identidad azul ·
+`#14` `monthly_rent` nullable · `#15` `pedidoSchema` `.nullish()` · `#16` conteo
+Zully (9) · `#17` endpoint `/inquiries`.
+
+## 10. Tareas Pendientes (WIP)
+
+* [ ] **(Oscar)** Tocar "Generar 14 cobros" en `/gestion` para arrancar el
+      tracking de agosto (₲ 24.484.094).
+* [ ] **(Oscar)** Crear usuarios para el padre + secretarias (igual que
+      `aycfam@gmail.com`; ahora la Site URL manda los mails al dominio real).
+* [ ] **(Revisión)** Aprobar `business-profiles-schema.sql` → luego backfill →
+      cutover del frontend (Codex) → limpieza de columnas desnormalizadas.
+* [ ] **(Deploy)** Correr `docs/sql/inquiries-kapso-idem.sql` en la BD viva
+      (para el endpoint `/inquiries`). No urgente: el bot está apagado.
+* [ ] **(Bot)** Los 3 prerrequisitos de §6, y cablear el ruteo de webhooks.
+* [ ] **(Oscar)** Adquirir la línea dedicada API-only (o cargar
+      `contactos_conocidos` si se sigue con Coexistence).
+* [ ] Cargar `business_profiles`, productos y fotos **solo** tras el relevamiento
+      y autorización de cada comercio.

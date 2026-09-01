@@ -2,6 +2,15 @@
 
 Mapa para que Codex inyecte sus componentes React sin pisar la arquitectura limpia.
 
+> ⚠️ **Documento histórico de integración (PRs #1–#7).** El frontend ya está
+> integrado y **en producción**. Para el estado real de hoy, ver la fuente de
+> verdad: **`docs/ESTADO.md`**. Cambios desde este plan: la proyección pública
+> **ya NO incluye `tenant_name`** (PR #12); existe el endpoint
+> `POST /api/integrations/kapso/inquiries` (PR #17); y el modelo de datos va
+> hacia el relacional de Fase 1 (`docs/sql/business-profiles-schema.sql`:
+> `occupancies`/`billing_accounts`/`business_profiles`), donde el alquiler deja
+> de vivir en `units`.
+
 ## Contexto
 - **Stack de Codex: Next.js App Router** (mismo que el nuestro) → es **portar componentes**, no migrar framework.
 - Tablas ya definidas (PR #2): `units`, `payments`, `inquiries`. Enums confirmados → CHECK en `docs/sql/status-constraints.sql`.
@@ -11,7 +20,7 @@ Mapa para que Codex inyecte sus componentes React sin pisar la arquitectura limp
 
 - **Páginas SSR/SSG** (directorio B2C, panel B2B): leen directo con `getServiceClient()` en Server Components. Sin fetch desde el cliente.
 - **Mutaciones y escrituras públicas**: vía Route Handlers con validación Zod + service role.
-- **Proyección pública vs admin**: los endpoints públicos **NUNCA** devuelven campos financieros ni PII (`monthly_rent`, `due_day`, `phone` del inquilino). Esos son solo admin.
+- **Proyección pública vs admin**: los endpoints públicos **NUNCA** devuelven campos financieros ni PII (`tenant_name`/nombre legal, `monthly_rent`, `expensa`, `beneficiario`, `due_day`, `phone` del inquilino). Esos son solo admin.
 
 ## Enums confirmados (CHECK)
 | Tabla | Campo | Valores |
@@ -26,8 +35,8 @@ Mapa para que Codex inyecte sus componentes React sin pisar la arquitectura limp
 ### Públicos (directorio B2C)
 | Método | Ruta | Qué | Devuelve (proyección segura) |
 |---|---|---|---|
-| GET | `/api/units` | directorio, filtros `floor`/`status`/`category`/`q` | code, floor, status, tenant_name, category |
-| GET | `/api/units/[code]` | detalle de un local | idem (+ contacto solo si es línea pública) |
+| GET | `/api/units` | directorio, filtros `floor`/`status`/`category`/`q` | code, floor, status, category *(SIN `tenant_name` — PR #12)* |
+| GET | `/api/units/[code]` | detalle de un local | idem (sin nombre legal ni datos financieros) |
 | POST | `/api/inquiries` | alta de consulta (Zod: kind, name, phone, message) | `{ ok, id }` |
 
 > Las páginas del directorio pueden leer `units` en Server Components directo; `GET /api/units` es para filtrado client-side o consumo externo.
