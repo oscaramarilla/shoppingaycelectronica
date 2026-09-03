@@ -36,6 +36,7 @@ El **bot de WhatsApp NO está encendido** (ver §6, freno de mano).
 | Datos reales (`units`) | ✅ 50 salones (26 PB + 24 PA, 21 libres) |
 | Panel `/gestion` | ✅ Vivo; usuario admin `aycfam@gmail.com` creado |
 | Identidad visual | ✅ Azul eléctrico + fachada + dirección + teléfono |
+| Sección "Grupo AYC" (2do piso) | ✅ 4 empresas con logo, copy y link (falta el logo de Oriplast) |
 | Bot de WhatsApp (Kapso) | ⛔ **Apagado** — faltan 3 prerrequisitos (§6) |
 | Modelo relacional Fase 1 | 📐 Propuesto (`business-profiles-schema.sql`), sin ejecutar |
 
@@ -135,7 +136,9 @@ migración (aditivo → backfill → cutover del frontend → limpieza) en ese a
 · `#7` frontend de Codex · `#8` runbook de deploy · `#9` perfiles demo + modelo
 · `#10` HANDOFF · `#11`–`#13` galería real + privacidad + identidad azul ·
 `#14` `monthly_rent` nullable · `#15` `pedidoSchema` `.nullish()` · `#16` conteo
-Zully (9) · `#17` endpoint `/inquiries`.
+Zully (9) · `#17` endpoint `/inquiries` · `#18` fuente de verdad + integridad de
+datos · `#19` páginas públicas `/locales` y `/categorias` · `#20` sección
+"Grupo AYC" en la portada (publicidad cruzada de las 4 empresas del 2do piso).
 
 ## 10. Tareas Pendientes (WIP)
 
@@ -152,3 +155,8 @@ Zully (9) · `#17` endpoint `/inquiries`.
       `contactos_conocidos` si se sigue con Coexistence).
 * [ ] Cargar `business_profiles`, productos y fotos **solo** tras el relevamiento
       y autorización de cada comercio.
+* [ ] **(Oscar)** Pasar el logo de Oriplast PY. `oriplastpy.com` no publica uno
+      propio (su sitio usa el de Metal Mad), así que la tarjeta muestra un
+      wordmark tipográfico. Para activarlo: dejar el archivo en
+      `public/images/grupo-ayc/` y apuntar `logo` en
+      `lib/directory/group-companies.ts`.

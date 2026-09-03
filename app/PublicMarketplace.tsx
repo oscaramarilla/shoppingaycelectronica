@@ -8,6 +8,7 @@ import {
   COMMERCIAL_UNIT_COUNT,
 } from "@/lib/directory/availability";
 import type { PublicUnit, UnitStatus } from "@/lib/domain/types";
+import GroupCompanies from "./_components/GroupCompanies";
 
 const GOOGLE_MAPS_URL = "https://share.google/nKy73IM4ruoa1guRK";
 const PRIMARY_PHONE = "0985 864209";
@@ -81,7 +82,7 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
           <span className="brand-copy"><strong>Electrónica</strong><small>Shopping &amp; tecnología</small></span>
         </a>
         <nav className="desktop-nav" aria-label="Navegación principal">
-          <a href="#disponibles">Salones disponibles</a><a href="#directorio">Directorio</a><a href="#visitanos">Cómo llegar</a>
+          <a href="#disponibles">Salones disponibles</a><a href="#directorio">Directorio</a><a href="#grupo-ayc">Grupo AYC</a><a href="#visitanos">Cómo llegar</a>
         </nav>
         <a className="header-cta" href={PRIMARY_PHONE_HREF} aria-label={`Llamar al ${PRIMARY_PHONE}`}><span>{PRIMARY_PHONE}</span><span aria-hidden="true">↗</span></a>
       </header>
@@ -137,6 +138,8 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
           <small className="vacancy-note">Disponibilidad relevada el 27/08/2026. La administración confirma condiciones y vigencia antes de reservar.</small>
         </div>
       </section>
+
+      <GroupCompanies />
 
       <section className="directory-section" id="directorio">
         <div className="section-heading"><div><p className="section-kicker">Directorio seguro</p><h2>Encontrá un salón<br />sin exponer <em>datos privados.</em></h2></div><p>El directorio muestra únicamente código, piso, estado y categoría autorizada. Los nombres legales, alquileres y teléfonos contractuales quedan en el panel privado.</p></div>

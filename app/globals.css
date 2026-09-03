@@ -189,6 +189,28 @@ h2 em { color: var(--orange); font-style: normal; }
 .rent-levels strong { text-transform: uppercase; font-size: 14px; }
 .rent-levels small { color: #9da9b2; margin-top: 7px; font-size: 11px; }
 
+.group-section { background: var(--cream); }
+.group-banner { padding: 74px 6vw; position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(270px, .85fr); gap: 6vw; align-items: end; background: var(--orange); color: white; }
+.group-banner::after { content: "AYC"; position: absolute; right: -1.5vw; bottom: -7.5vw; font-size: 25vw; font-weight: 900; line-height: .8; color: rgba(0, 32, 96, .14); letter-spacing: -.1em; pointer-events: none; }
+.group-noise { position: absolute; inset: 0; opacity: .16; background-image: radial-gradient(rgba(255,255,255,.6) .55px, transparent .55px); background-size: 7px 7px; }
+.group-banner-copy, .group-banner-lede { position: relative; z-index: 1; }
+.group-banner h2 { font-size: clamp(36px, 4.4vw, 60px); }
+.group-banner h2 em { color: var(--ink); font-style: normal; }
+.group-banner-lede { max-width: 430px; margin: 0 0 9px; color: rgba(255,255,255,.9); font-size: 15px; line-height: 1.65; }
+
+.group-grid { list-style: none; margin: 0; padding: 58px 6vw 105px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.group-card { height: 100%; min-height: 350px; padding: 26px; display: flex; flex-direction: column; background: var(--cream); border: 1px solid #d6e2f3; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.group-card:hover { transform: translateY(-6px); border-color: var(--orange); box-shadow: 0 18px 34px rgba(0, 43, 119, .14); }
+.group-logo { height: 76px; margin-bottom: 24px; position: relative; display: flex; align-items: center; justify-content: center; }
+.group-logo img { object-fit: contain; transition: transform .2s ease; }
+.group-wordmark { color: var(--orange); font-size: 27px; font-weight: 900; letter-spacing: -.05em; text-align: center; transition: transform .2s ease; }
+.group-card:hover .group-logo img, .group-card:hover .group-wordmark { transform: scale(1.07); }
+.group-tagline { color: var(--orange-dark); font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
+.group-card > strong { margin: 10px 0 9px; font-size: 21px; letter-spacing: -.03em; }
+.group-card p { margin: 0 0 20px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.group-cta { margin-top: auto; padding-top: 18px; border-top: 1px solid #d6e2f3; display: flex; justify-content: space-between; align-items: center; color: var(--orange-dark); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+.group-card:hover .group-cta { color: var(--orange); }
+
 .services-section { background: var(--cream); }
 .service-list { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #d6e2f3; }
 .service-list article { min-height: 245px; padding: 36px; border-right: 1px solid #d6e2f3; }
@@ -331,6 +353,9 @@ footer > p { color: #aabbd0; font-size: 13px; line-height: 1.7; } footer > p a {
   .profile-location-card { max-width: 560px; }
   .profile-contact { align-items: start; flex-direction: column; }
   .rent-section, .location-section, .contact-section { grid-template-columns: 1fr; }
+  .group-banner { grid-template-columns: 1fr; gap: 30px; align-items: start; }
+  .group-banner-lede { margin: 0; }
+  .group-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .vacancy-board { max-width: 680px; width: 100%; }
   .faq-section { grid-template-columns: 1fr; }
   footer { grid-template-columns: 1fr 1fr; }
@@ -367,6 +392,10 @@ footer > p { color: #aabbd0; font-size: 13px; line-height: 1.7; } footer > p a {
   .offers-grid { grid-template-columns: 1fr; }
   .profile-preview-grid { grid-template-columns: 1fr; }
   .unit-grid { grid-template-columns: 1fr; }
+  .group-banner { padding: 62px 20px; }
+  .group-banner::after { font-size: 34vw; bottom: -10vw; }
+  .group-grid { padding: 40px 20px 72px; grid-template-columns: 1fr; }
+  .group-card { min-height: auto; padding: 22px; }
   .demo-notice { align-items: start; flex-direction: column; }
   .profile-topbar { height: auto; min-height: 68px; padding: 14px 20px; }
   .profile-topbar .brand-copy { display: none; }
