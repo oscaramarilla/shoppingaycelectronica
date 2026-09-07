@@ -2,17 +2,20 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Image from "next/image";
+import { summarizePublicAvailability } from "@/lib/directory/availability";
 import {
-  AVAILABLE_UNIT_COUNT,
-  AVAILABLE_UNITS_BY_FLOOR,
-  COMMERCIAL_UNIT_COUNT,
-} from "@/lib/directory/availability";
+  buildPublicInquiryHref,
+  type PublicInquiryContext,
+  type PublicInquiryKind,
+} from "@/lib/directory/inquiry-context";
 import type { PublicUnit, UnitStatus } from "@/lib/domain/types";
+import { buildWhatsappHref } from "@/lib/marketplace/format";
 import GroupCompanies from "./_components/GroupCompanies";
 
 const GOOGLE_MAPS_URL = "https://share.google/nKy73IM4ruoa1guRK";
 const PRIMARY_PHONE = "0985 864209";
 const PRIMARY_PHONE_HREF = "tel:+595985864209";
+const PRIMARY_WHATSAPP = "595985864209";
 const PRIMARY_ADDRESS = "P92H+J7H, Mayor Fleitas esquina, Zona Mercado 4, Asunción 001224";
 
 const unitStatusLabels: Record<UnitStatus, string> = {
@@ -22,18 +25,20 @@ const unitStatusLabels: Record<UnitStatus, string> = {
   maintenance: "En preparación",
 };
 
-const faqs = [
-  ["¿Cuántos salones comerciales tiene la galería?", "Son 50 salones: 26 en Planta Baja y 24 en Planta Alta. El 2do piso corresponde a administración y AYC Empresas; no se ofrece como salón comercial."],
-  ["¿Cuántos salones están disponibles?", "Hay 21 vacancias verificadas: 4 en Planta Baja y 17 en Planta Alta."],
-  ["¿Por qué la Planta Alta es una oportunidad?", "Tiene 17 de sus 24 salones disponibles, aproximadamente el 70%. Es el nivel con mayor capacidad para recibir nuevos comercios y propuestas complementarias."],
-  ["¿Dónde queda y cuál es el teléfono principal?", `Estamos en ${PRIMARY_ADDRESS}. El teléfono principal es ${PRIMARY_PHONE}.`],
-  ["¿Cómo consulto por un salón?", "Elegí una vacancia y completá el formulario. El equipo de AYC confirmará condiciones, expensa, disponibilidad y una visita."],
-  ["¿Cuándo aparecerán los nombres y productos de los comercios?", "Se publicarán únicamente después del relevamiento y la autorización de cada inquilino. Los nombres legales y datos de alquiler nunca serán públicos."],
-];
-
-export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
+export default function PublicMarketplace({
+  units,
+  initialInquiry,
+}: {
+  units: PublicUnit[];
+  initialInquiry: PublicInquiryContext;
+}) {
+  const availability = useMemo(() => summarizePublicAvailability(units), [units]);
+  const groundFloor = availability.floors[0];
+  const upperFloor = availability.floors[1];
   const [category, setCategory] = useState("Todo");
   const [query, setQuery] = useState("");
+  const [inquiryKind, setInquiryKind] = useState<PublicInquiryKind>(initialInquiry.kind);
+  const [inquiryMessage, setInquiryMessage] = useState(initialInquiry.message);
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   const categories = useMemo(() => [
@@ -49,6 +54,39 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
       return categoryMatch && (!normalized || searchable.includes(normalized));
     });
   }, [category, query, units]);
+  const noResultsSubject = query.trim() || (category === "Todo" ? "una necesidad de compra o reparación" : `la categoría ${category}`);
+
+  const faqs = [
+    [
+      "¿Cuántos salones comerciales tiene la galería?",
+      availability.hasData
+        ? `Son ${availability.commercialUnitCount} salones: ${groundFloor.total} en Planta Baja y ${upperFloor.total} en Planta Alta. El 2do piso corresponde a administración y AYC Empresas; no se ofrece como salón comercial.`
+        : "La administración confirmará la disponibilidad y la distribución actual de los salones.",
+    ],
+    [
+      "¿Cuántos salones están disponibles?",
+      availability.hasData
+        ? `Hay ${availability.availableUnitCount} vacancias publicadas: ${groundFloor.available} en Planta Baja y ${upperFloor.available} en Planta Alta.`
+        : "La administración confirmará la disponibilidad actual antes de coordinar una visita.",
+    ],
+    [
+      "¿Por qué la Planta Alta es una oportunidad?",
+      availability.hasData
+        ? upperFloor.opportunity
+        : "La administración puede orientarte sobre el nivel más adecuado para tu comercio o servicio.",
+    ],
+    ["¿Dónde queda y cuál es el teléfono principal?", `Estamos en ${PRIMARY_ADDRESS}. El teléfono principal es ${PRIMARY_PHONE}.`],
+    ["¿Cómo consulto por un salón?", "Elegí una vacancia y completá el formulario. El equipo de AYC confirmará condiciones, expensa, disponibilidad y una visita."],
+    ["¿Cuándo aparecerán los nombres y productos de los comercios?", "Se publicarán únicamente después del relevamiento y la autorización de cada inquilino. Los nombres legales y datos de alquiler nunca serán públicos."],
+  ];
+
+  function inquiryHref(kind: PublicInquiryKind, message: string) {
+    return buildPublicInquiryHref({ kind, message });
+  }
+
+  function whatsappHref(subject: string) {
+    return buildWhatsappHref(PRIMARY_WHATSAPP, subject);
+  }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,6 +106,8 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
       });
       if (!response.ok) throw new Error("request failed");
       formElement.reset();
+      setInquiryKind("alquiler");
+      setInquiryMessage("");
       setFormState("sent");
     } catch {
       setFormState("error");
@@ -84,7 +124,7 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
         <nav className="desktop-nav" aria-label="Navegación principal">
           <a href="#disponibles">Salones disponibles</a><a href="#directorio">Directorio</a><a href="#grupo-ayc">Grupo AYC</a><a href="#visitanos">Cómo llegar</a>
         </nav>
-        <a className="header-cta" href={PRIMARY_PHONE_HREF} aria-label={`Llamar al ${PRIMARY_PHONE}`}><span>{PRIMARY_PHONE}</span><span aria-hidden="true">↗</span></a>
+        <a className="header-cta" href={whatsappHref("la galería de Shopping AYC")} target="_blank" rel="noreferrer" aria-label="Escribir por WhatsApp a Shopping AYC"><span>WhatsApp</span><span aria-hidden="true">↗</span></a>
       </header>
 
       <section className="hero" id="inicio">
@@ -92,7 +132,7 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
         <div className="hero-content">
           <p className="eyebrow"><span /> Mercado 4 · Asunción</p>
           <h1>Un rincón de <em>CDE</em><br />en el corazón de Asunción.</h1>
-          <p className="hero-lede">Una galería de 50 salones comerciales en Planta Baja y Planta Alta, con administración y AYC Empresas en el 2do piso.</p>
+          <p className="hero-lede">{availability.hasData ? `Una galería de ${availability.commercialUnitCount} salones comerciales en Planta Baja y Planta Alta` : "Una galería comercial en Planta Baja y Planta Alta"}, con administración y AYC Empresas en el 2do piso.</p>
           <form className="search-box" onSubmit={handleSearch}>
             <label className="sr-only" htmlFor="search">Buscar por salón o categoría</label>
             <span aria-hidden="true">⌕</span>
@@ -100,42 +140,41 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
             <button type="submit">Buscar</button>
           </form>
           <div className="category-row" aria-label="Datos destacados">
-            <a href="#disponibles"><span aria-hidden="true">+</span>{AVAILABLE_UNIT_COUNT} vacancias verificadas</a>
-            <a href="#disponibles"><span aria-hidden="true">+</span>Planta Alta · ~70% disponible</a>
+            {availability.hasData ? <><a href="#disponibles"><span aria-hidden="true">+</span>{availability.availableUnitCount} vacancias publicadas</a><a href="#disponibles"><span aria-hidden="true">+</span>Planta Alta · {upperFloor.total ? `~${Math.round((upperFloor.available / upperFloor.total) * 100)}% disponible` : "consultar"}</a></> : <a href="#contacto"><span aria-hidden="true">+</span>Consultar disponibilidad</a>}
           </div>
         </div>
         <aside className="building-card" aria-label="Distribución real de Shopping AYC Electrónica">
           <div className="card-topline"><span>AYC / M4</span><span>ASUNCIÓN · PY</span></div>
           <div className="building-visual">
             <div className="floor floor-two"><span>02</span><strong>2do piso</strong><small>Administración · AYC Empresas</small></div>
-            <div className="floor floor-one"><span>PA</span><strong>Planta Alta</strong><small>24 salones · 17 disponibles</small></div>
-            <div className="floor floor-ground"><span>PB</span><strong>Planta Baja</strong><small>26 salones · 4 disponibles</small></div>
+            <div className="floor floor-one"><span>PA</span><strong>Planta Alta</strong><small>{availability.hasData ? `${upperFloor.total} salones · ${upperFloor.available} disponibles` : "Disponibilidad a confirmar"}</small></div>
+            <div className="floor floor-ground"><span>PB</span><strong>Planta Baja</strong><small>{availability.hasData ? `${groundFloor.total} salones · ${groundFloor.available} disponibles` : "Disponibilidad a confirmar"}</small></div>
           </div>
-          <div className="availability"><span className="status-dot" /><div><strong>21 salones disponibles</strong><small>Vacancias verificadas el 27/08/2026</small></div><a href="#disponibles" aria-label="Ver salones disponibles">→</a></div>
+          <div className="availability"><span className="status-dot" /><div><strong>{availability.hasData ? `${availability.availableUnitCount} salones disponibles` : "Disponibilidad a confirmar"}</strong><small>{availability.hasData ? "Actualizado desde la base de la galería" : "Consultá con la administración"}</small></div><a href={availability.hasData ? "#disponibles" : "#contacto"} aria-label="Consultar salones disponibles">→</a></div>
         </aside>
       </section>
 
       <section className="proof-strip" aria-label="Datos verificados de la galería">
-        <div><strong>{COMMERCIAL_UNIT_COUNT}</strong><span>salones comerciales</span></div><div><strong>{AVAILABLE_UNIT_COUNT}</strong><span>disponibles hoy</span></div><div><strong>3</strong><span>niveles reales</span></div><p><span>Distribución</span><strong>PB + PA comercial · 2do administración</strong></p>
+        <div><strong>{availability.hasData ? availability.commercialUnitCount : "—"}</strong><span>salones comerciales</span></div><div><strong>{availability.hasData ? availability.availableUnitCount : "—"}</strong><span>disponibles hoy</span></div><div><strong>3</strong><span>niveles reales</span></div><p><span>Distribución</span><strong>PB + PA comercial · 2do administración</strong></p>
       </section>
 
       <section className="rent-section availability-focus" id="disponibles">
         <div className="rent-copy">
           <p className="section-kicker light">Salones disponibles / Quiero alquilar</p>
-          <h2><strong>21 vacancias.</strong><br />La Planta Alta es<br /><em>la oportunidad.</em></h2>
-          <p>Con 17 de 24 salones disponibles, la Planta Alta concentra aproximadamente el 70% de la capacidad libre. Es el momento para sumar comercios, servicios y propuestas que atraigan más público a todo el shopping.</p>
+          <h2>{availability.hasData ? <><strong>{availability.availableUnitCount} vacancias.</strong><br />La Planta Alta es<br /><em>la oportunidad.</em></> : <>Consultá por un<br /><em>espacio para tu negocio.</em></>}</h2>
+          <p>{availability.hasData ? upperFloor.opportunity : "La administración confirmará qué espacios están disponibles y cuáles son las condiciones actuales antes de una visita."}</p>
           <ul><li><span>01</span>Ubicación en el corazón del Mercado 4</li><li><span>02</span>Ficha pública y promoción dentro del marketplace AYC</li><li><span>03</span>Contacto directo con la administración para visitar</li></ul>
-          <a className="primary-cta" href="#contacto">Quiero conocer un salón <span>↗</span></a>
+          <a className="primary-cta" href={inquiryHref("alquiler", "Quiero conocer los salones disponibles y coordinar una visita.")}>Quiero conocer un salón <span>↗</span></a>
         </div>
         <div className="vacancy-board" aria-label="Listado de salones disponibles">
-          {AVAILABLE_UNITS_BY_FLOOR.slice().reverse().map((group) => (
+          {availability.hasData ? availability.floors.slice().reverse().map((group) => (
             <article className={group.shortLabel === "PA" ? "featured" : ""} key={group.shortLabel}>
               <header><div><span>{group.shortLabel}</span><strong>{group.floor}</strong></div><p><b>{group.available}</b> de {group.total}<small>disponibles</small></p></header>
               <p>{group.opportunity}</p>
-              <div className="vacancy-codes">{group.codes.map((code) => <a href="#contacto" key={code} aria-label={`Consultar alquiler del salón ${code}`}>{code}</a>)}</div>
+              <div className="vacancy-codes">{group.codes.map((code) => <a href={inquiryHref("alquiler", `Me interesa el salón ${code} y quiero coordinar una visita.`)} key={code} aria-label={`Consultar alquiler del salón ${code}`}>{code}</a>)}</div>
             </article>
-          ))}
-          <small className="vacancy-note">Disponibilidad relevada el 27/08/2026. La administración confirma condiciones y vigencia antes de reservar.</small>
+          )) : <article><p>Estamos actualizando la disponibilidad. Escribinos y la administración te orientará sobre las opciones vigentes.</p></article>}
+          <small className="vacancy-note">La administración confirma condiciones y vigencia antes de reservar.</small>
         </div>
       </section>
 
@@ -151,10 +190,10 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
             <h3>{unit.status === "available" ? "Salón disponible" : "Salón ocupado"}</h3>
             <p>{unit.category ?? (unit.status === "available" ? "Consultá condiciones de alquiler" : "Perfil comercial pendiente de autorización")}</p>
             <small>{unit.floor}</small>
-            <a href={unit.status === "available" ? "#contacto" : "#directorio"}>{unit.status === "available" ? "Consultar alquiler" : "Ficha comercial próximamente"}<span>→</span></a>
+            <a href={unit.status === "available" ? inquiryHref("alquiler", `Me interesa el salón ${unit.code} y quiero coordinar una visita.`) : "#directorio"}>{unit.status === "available" ? "Consultar alquiler" : "Ficha comercial próximamente"}<span>→</span></a>
           </article>)}
-          {units.length === 0 && <p className="empty-state">El directorio completo aparecerá al conectar la base oficial. Las 21 vacancias verificadas ya están publicadas en la sección anterior.</p>}
-          {units.length > 0 && filteredUnits.length === 0 && <p className="empty-state">No encontramos un salón con esos filtros. Probá con el código, el piso o escribinos.</p>}
+          {units.length === 0 && <p className="empty-state">No pudimos cargar el directorio ahora. Escribinos para confirmar la disponibilidad actual.</p>}
+          {units.length > 0 && filteredUnits.length === 0 && <div className="empty-state"><p>No encontramos un salón con esos filtros. Podemos orientarte sobre “{noResultsSubject}” por WhatsApp o registrar tu consulta.</p><div className="empty-actions"><a href={inquiryHref("producto", `Busco ${noResultsSubject} y quiero saber qué comercio o servicio puede ayudarme.`)}>Pedir orientación <span>→</span></a><a href={whatsappHref(`una consulta sobre ${noResultsSubject}`)} target="_blank" rel="noreferrer">Escribir por WhatsApp <span>↗</span></a></div></div>}
         </div>
       </section>
 
@@ -168,17 +207,17 @@ export default function PublicMarketplace({ units }: { units: PublicUnit[] }) {
           <Image src="/images/shopping-ayc-fachada.png" alt="Fachada azul de Shopping AYC Electrónica en el Mercado 4 de Asunción" fill sizes="(max-width: 900px) 100vw, 55vw" />
           <figcaption><span>Ubicación oficial</span><strong>Shopping AYC Electrónica</strong></figcaption>
         </figure>
-        <div className="location-copy"><p className="section-kicker">Vení a conocernos</p><h2>En el corazón<br />del Mercado 4.</h2><p>La galería tiene Planta Baja y Planta Alta comerciales. El 2do piso concentra la administración y los cuatro negocios familiares de AYC.</p><dl><div><dt>Dirección</dt><dd>{PRIMARY_ADDRESS}</dd></div><div><dt>Teléfono</dt><dd><a href={PRIMARY_PHONE_HREF}>{PRIMARY_PHONE}</a></dd></div><div><dt>Galería</dt><dd>50 salones comerciales · 21 disponibles</dd></div></dl><div className="location-actions"><a className="primary-cta" href={GOOGLE_MAPS_URL} target="_blank" rel="noreferrer">Cómo llegar <span>↗</span></a><a className="outline-cta" href={PRIMARY_PHONE_HREF}>Llamar ahora <span>→</span></a></div></div>
+        <div className="location-copy"><p className="section-kicker">Vení a conocernos</p><h2>En el corazón<br />del Mercado 4.</h2><p>La galería tiene Planta Baja y Planta Alta comerciales. El 2do piso concentra la administración y los cuatro negocios familiares de AYC.</p><dl><div><dt>Dirección</dt><dd>{PRIMARY_ADDRESS}</dd></div><div><dt>Teléfono</dt><dd><a href={PRIMARY_PHONE_HREF}>{PRIMARY_PHONE}</a></dd></div><div><dt>Galería</dt><dd>{availability.hasData ? `${availability.commercialUnitCount} salones comerciales · ${availability.availableUnitCount} disponibles` : "Disponibilidad a confirmar"}</dd></div></dl><div className="location-actions"><a className="primary-cta" href={GOOGLE_MAPS_URL} target="_blank" rel="noreferrer">Cómo llegar <span>↗</span></a><a className="outline-cta" href={whatsappHref("la galería de Shopping AYC")} target="_blank" rel="noreferrer">Escribir por WhatsApp <span>↗</span></a></div></div>
       </section>
 
       <section className="faq-section"><div><p className="section-kicker">Preguntas frecuentes</p><h2>Datos claros.</h2></div><div className="faq-list">{faqs.map(([question, answer]) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></section>
 
       <section className="contact-section" id="contacto">
-        <div><p className="section-kicker light">Quiero alquilar</p><h2>Conocé las vacancias<br />y coordiná una visita.</h2><p>Indicá el código del salón que te interesa o contanos qué tipo de espacio buscás. La administración confirmará disponibilidad y condiciones.</p><a className="contact-phone" href={PRIMARY_PHONE_HREF}><small>Teléfono principal</small><strong>{PRIMARY_PHONE}</strong><span>→</span></a></div>
+        <div><p className="section-kicker light">Contacto directo</p><h2>Conocé las vacancias<br />y coordiná una visita.</h2><p>Indicá el código del salón que te interesa o contanos qué tipo de espacio buscás. La administración confirmará disponibilidad y condiciones.</p><a className="contact-phone" href={whatsappHref(inquiryMessage || "la disponibilidad de la galería")} target="_blank" rel="noreferrer"><small>Escribir por WhatsApp</small><strong>{PRIMARY_PHONE}</strong><span>↗</span></a></div>
         <form className="inquiry-form" onSubmit={handleInquiry}>
-          <label>Quiero consultar por<select name="kind" defaultValue="alquiler"><option value="alquiler">Alquiler de un salón</option><option value="producto">Un producto o servicio</option><option value="comerciante">Mi ficha como comerciante</option></select></label>
+          <label>Quiero consultar por<select name="kind" value={inquiryKind} onChange={(event) => setInquiryKind(event.target.value as PublicInquiryKind)}><option value="alquiler">Alquiler de un salón</option><option value="producto">Un producto o servicio</option><option value="comerciante">Mi ficha como comerciante</option></select></label>
           <div className="field-pair"><label>Nombre y apellido<input name="name" required autoComplete="name" /></label><label>Teléfono / WhatsApp<input name="phone" required inputMode="tel" autoComplete="tel" /></label></div>
-          <label>Salón o necesidad<textarea name="message" rows={4} required placeholder="Ej.: Me interesa PA-44 y quiero coordinar una visita." /></label>
+          <label>Salón o necesidad<textarea name="message" rows={4} required value={inquiryMessage} onChange={(event) => setInquiryMessage(event.target.value)} placeholder="Ej.: Me interesa PA-44 y quiero coordinar una visita." /></label>
           <button type="submit" disabled={formState === "sending"}>{formState === "sending" ? "Enviando…" : "Enviar consulta"}<span>→</span></button>
           <p className={`form-message ${formState}`}>{formState === "sent" ? "¡Gracias! Tu consulta fue registrada correctamente." : formState === "error" ? "No pudimos registrar la consulta. Probá nuevamente." : "Tus datos se usarán únicamente para responder esta consulta."}</p>
         </form>

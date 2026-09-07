@@ -1,6 +1,6 @@
 # Estado Actual de shoppingaycelectronica — Torre de Control
 
-> **Fuente de verdad operativa. Última actualización: 2026-08-28.**
+> **Fuente de verdad operativa. Última actualización: 2026-09-07.**
 > Refleja la realidad EXACTA de producción. Si algo acá contradice a otro doc,
 > manda este. Todo agente/LLM lee esto y `AGENTS.md` antes de tocar nada.
 
@@ -37,6 +37,7 @@ El **bot de WhatsApp NO está encendido** (ver §6, freno de mano).
 | Panel `/gestion` | ✅ Vivo; usuario admin `aycfam@gmail.com` creado |
 | Identidad visual | ✅ Azul eléctrico + fachada + dirección + teléfono |
 | Sección "Grupo AYC" (2do piso) | ✅ 4 empresas con logo, copy y link (falta el logo de Oriplast) |
+| Contexto de consultas + disponibilidad pública | 🚧 PR `codex/contextual-inquiries`: conserva salón/producto/búsqueda, añade WhatsApp y deriva vacancias desde `units`; pendiente de revisión y deploy |
 | Bot de WhatsApp (Kapso) | ⛔ **Apagado** — faltan 3 prerrequisitos (§6) |
 | Modelo relacional Fase 1 | 📐 Propuesto (`business-profiles-schema.sql`), sin ejecutar |
 
@@ -142,6 +143,7 @@ datos · `#19` páginas públicas `/locales` y `/categorias` · `#20` sección
 
 ## 10. Tareas Pendientes (WIP)
 
+* [ ] **(Revisión / deploy)** Revisar y mergear `codex/contextual-inquiries`: la portada debe conservar el contexto de salón, producto o búsqueda en el formulario; ofrecer WhatsApp cuando no haya resultados; y mostrar conteos/códigos de vacancias desde `units`, no desde constantes. No publica perfiles, productos, fotos ni precios sin autorización.
 * [ ] **(Oscar)** Tocar "Generar 14 cobros" en `/gestion` para arrancar el
       tracking de agosto (₲ 24.484.094).
 * [ ] **(Oscar)** Crear usuarios para el padre + secretarias (igual que
