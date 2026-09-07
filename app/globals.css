@@ -107,6 +107,10 @@ h2 em { color: var(--orange); font-style: normal; }
 .offer-body a { margin-top: 20px; padding-top: 16px; border-top: 1px solid #ddd6ca; display: flex; justify-content: space-between; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
 .offer-body a:hover { color: var(--orange-dark); }
 .empty-state { grid-column: 1 / -1; padding: 50px; text-align: center; background: var(--cream); color: var(--muted); }
+.empty-state p { margin: 0; }
+.empty-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.empty-actions a { padding: 12px 14px; color: white; background: var(--ink); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.empty-actions a:hover { color: var(--ink); background: var(--orange); }
 
 .directory-section { background: #edf4ff; }
 .directory-summary { margin: -18px 0 28px; display: flex; align-items: baseline; gap: 10px; color: var(--muted); font-size: 12px; }

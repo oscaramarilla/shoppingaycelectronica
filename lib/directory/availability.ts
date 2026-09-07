@@ -1,33 +1,68 @@
-/**
- * Hechos públicos verificados en el relevamiento de la galería del 2026-08-27.
- * Fuente: docs/data/RELEVAMIENTO-GALERIA.md.
- *
- * No contiene nombres de inquilinos, alquileres ni ningún dato contractual.
- */
-export const COMMERCIAL_UNIT_COUNT = 50;
-export const AVAILABLE_UNIT_COUNT = 21;
+import type { PublicUnit } from "@/lib/domain/types";
 
-export const AVAILABLE_UNITS_BY_FLOOR = [
-  {
-    floor: "Planta Baja",
-    shortLabel: "PB",
-    total: 26,
-    available: 4,
-    codes: ["PB-11", "PB-16", "PB-19", "PB-26"],
-    opportunity: "Pocas vacancias en el nivel de mayor circulación.",
-  },
-  {
-    floor: "Planta Alta",
-    shortLabel: "PA",
-    total: 24,
-    available: 17,
-    codes: [
-      "PA-31", "PA-32", "PA-33", "PA-34", "PA-35", "PA-36",
-      "PA-39", "PA-42", "PA-44", "PA-45", "PA-46", "PA-47",
-      "PA-48", "PA-49", "PA-50", "PA-51", "PA-52",
-    ],
-    opportunity: "Aproximadamente 70% disponible: la gran oportunidad para crecer con el shopping.",
-  },
+const COMMERCIAL_FLOORS = [
+  { floor: "Planta Baja", shortLabel: "PB" },
+  { floor: "Planta Alta", shortLabel: "PA" },
 ] as const;
 
-export const AVAILABLE_UNIT_CODES = AVAILABLE_UNITS_BY_FLOOR.flatMap(({ codes }) => codes);
+export type AvailabilityByFloor = {
+  floor: string;
+  shortLabel: string;
+  total: number;
+  available: number;
+  codes: string[];
+  opportunity: string;
+};
+
+export type PublicAvailability = {
+  commercialUnitCount: number;
+  availableUnitCount: number;
+  floors: AvailabilityByFloor[];
+  hasData: boolean;
+};
+
+function describeOpportunity(floor: string, available: number, total: number) {
+  if (total === 0) return "La administración confirmará la disponibilidad.";
+  if (available === 0) return "Actualmente no hay vacancias publicadas en este nivel.";
+
+  const percentage = Math.round((available / total) * 100);
+  if (floor === "Planta Alta" && percentage >= 50) {
+    return `${percentage}% de este nivel está disponible: una oportunidad para sumar nuevos comercios y servicios.`;
+  }
+
+  return `${available} ${available === 1 ? "vacancia publicada" : "vacancias publicadas"} en este nivel.`;
+}
+
+/**
+ * Resume la proyección pública de `units` para la portada. No recibe ni expone
+ * información contractual: los conteos y códigos cambian únicamente con el
+ * estado real de cada salón en Supabase.
+ */
+export function summarizePublicAvailability(units: readonly PublicUnit[]): PublicAvailability {
+  const floors = COMMERCIAL_FLOORS.map(({ floor, shortLabel }) => {
+    const floorUnits = units.filter((unit) => unit.floor === floor);
+    const codes = floorUnits
+      .filter((unit) => unit.status === "available")
+      .map((unit) => unit.code)
+      .sort((left, right) => left.localeCompare(right, "es"));
+
+    return {
+      floor,
+      shortLabel,
+      total: floorUnits.length,
+      available: codes.length,
+      codes,
+      opportunity: describeOpportunity(floor, codes.length, floorUnits.length),
+    };
+  });
+
+  const commercialUnitCount = floors.reduce((total, floor) => total + floor.total, 0);
+  const availableUnitCount = floors.reduce((total, floor) => total + floor.available, 0);
+
+  return {
+    commercialUnitCount,
+    availableUnitCount,
+    floors,
+    hasData: commercialUnitCount > 0,
+  };
+}
