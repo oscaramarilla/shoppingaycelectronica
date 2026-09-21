@@ -1,0 +1,22 @@
+{
+  "Metadata": {
+    "titleDefault": "AYC Electrónica | Tecnología en el Mercado 4",
+    "titleTemplate": "%s | AYC Electrónica",
+    "description": "Tecnología, electrónica, servicio técnico y locales comerciales en el Mercado 4 de Asunción. Un rincón de CDE en Asunción.",
+    "ogTitle": "AYC Electrónica | Un rincón de CDE en Asunción"
+  },
+  "Navigation": {
+    "home": "Inicio",
+    "categories": "Categorías",
+    "stores": "Locales",
+    "admin": "Gestión"
+  },
+  "Marketplace": {
+    "searchPlaceholder": "Buscar productos, marcas o locales...",
+    "noResults": "No encontramos resultados para tu búsqueda.",
+    "noResultsHelp": "¿No encuentras lo que buscas? Escríbenos y te ayudamos.",
+    "contactWhatsApp": "Consultar por WhatsApp",
+    "viewStore": "Ver local",
+    "vacant": "Disponible para alquiler"
+  }
+}
