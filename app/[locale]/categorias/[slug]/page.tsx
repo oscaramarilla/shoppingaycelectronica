@@ -18,7 +18,7 @@ import {
 } from "@/lib/marketplace/data";
 import { buildMarketplaceInquiryHref } from "@/lib/marketplace/format";
 import { buildCategoryJsonLd } from "@/lib/marketplace/seo";
-import styles from "@/app/marketplace-pages.module.css";
+import styles from "../../marketplace-pages.module.css";
 
 type CategoryPageProps = {
   params: Promise<{ slug: string }>;
