@@ -38,6 +38,7 @@ El **bot de WhatsApp NO está encendido** (ver §6, freno de mano).
 | Identidad visual | ✅ Azul eléctrico + fachada + dirección + teléfono |
 | Sección "Grupo AYC" (2do piso) | ✅ 4 empresas con logo, copy y link (falta el logo de Oriplast) |
 | Contexto de consultas + disponibilidad pública | 🚧 PR `codex/contextual-inquiries`: conserva salón/producto/búsqueda, añade WhatsApp y deriva vacancias desde `units`; pendiente de revisión y deploy |
+| Telemetría Vercel (Web Analytics + Speed Insights) | 🚧 Rama `chore/vercel-telemetry-a11y`: paquetes `@vercel/analytics` y `@vercel/speed-insights` en `app/layout.tsx`. **Antes de esto el sitio no enviaba datos**, aunque Web Analytics figurara activo en el panel. Sin datos hasta el deploy |
 | Bot de WhatsApp (Kapso) | ⛔ **Apagado** — faltan 3 prerrequisitos (§6) |
 | Modelo relacional Fase 1 | 📐 Propuesto (`business-profiles-schema.sql`), sin ejecutar |
 
@@ -142,6 +143,20 @@ datos · `#19` páginas públicas `/locales` y `/categorias` · `#20` sección
 "Grupo AYC" en la portada (publicidad cruzada de las 4 empresas del 2do piso).
 
 ## 10. Tareas Pendientes (WIP)
+
+* [ ] **(Deploy)** Tras mergear `chore/vercel-telemetry-a11y`: confirmar en Vercel →
+      Analytics y Speed Insights que llegan visitas reales (los scripts
+      `/_vercel/insights/*` y `/_vercel/speed-insights/*` solo existen dentro de
+      Vercel; en local dan 404). Los Web Vitals de campo tardan semanas en juntar
+      volumen; hoy PageSpeed no tiene datos CrUX.
+* [ ] **(Coordinación PR #22 i18n)** Ese PR borra `app/layout.tsx` y crea
+      `app/[locale]/layout.tsx`. Al mergear, mover `<Analytics />` y
+      `<SpeedInsights />` (más sus dos imports) al `<body>` del layout nuevo.
+* [ ] **(Frontend)** Contraste WCAG en `/locales/*` y `/categorias/*`: quedan 4
+      nodos por página en `app/marketplace-pages.module.css` (`.trustStrip span`
+      `#c2daff` y `.conversionBand p` `#d1e3ff` sobre `#0066ff`, ~3,4–3,7:1;
+      en categorías además `.businessCardArt small` y `.categoryLinks`). La portada
+      `/` ya cumple 4,5:1 (medido con axe-core, mobile y escritorio).
 
 * [ ] **(Revisión / deploy)** Revisar y mergear `codex/contextual-inquiries`: la portada debe conservar el contexto de salón, producto o búsqueda en el formulario; ofrecer WhatsApp cuando no haya resultados; y mostrar conteos/códigos de vacancias desde `units`, no desde constantes. No publica perfiles, productos, fotos ni precios sin autorización.
 * [ ] **(Oscar)** Tocar "Generar 14 cobros" en `/gestion` para arrancar el
