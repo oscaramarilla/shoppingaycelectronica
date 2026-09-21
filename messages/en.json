@@ -1,0 +1,22 @@
+{
+  "Metadata": {
+    "titleDefault": "AYC Electronics | Technology at Mercado 4",
+    "titleTemplate": "%s | AYC Electronics",
+    "description": "Technology, electronics, tech support, and commercial stores at Mercado 4 in Asunción. A corner of CDE in Asunción.",
+    "ogTitle": "AYC Electronics | A corner of CDE in Asunción"
+  },
+  "Navigation": {
+    "home": "Home",
+    "categories": "Categories",
+    "stores": "Stores",
+    "admin": "Management"
+  },
+  "Marketplace": {
+    "searchPlaceholder": "Search products, brands, or stores...",
+    "noResults": "We couldn't find any results for your search.",
+    "noResultsHelp": "Can't find what you are looking for? Contact us and we will help you.",
+    "contactWhatsApp": "Ask via WhatsApp",
+    "viewStore": "View store",
+    "vacant": "Available for rent"
+  }
+}
