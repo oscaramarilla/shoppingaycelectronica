@@ -13,7 +13,8 @@ function getMetadataBase() {
   }
 }
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
 
   return {
@@ -46,11 +47,12 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 
 export default async function RootLayout({
   children,
-  params: { locale }
+  params
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }

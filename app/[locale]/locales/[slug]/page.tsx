@@ -21,7 +21,7 @@ import {
   buildWhatsappHref,
 } from "@/lib/marketplace/format";
 import { buildBusinessProfileJsonLd } from "@/lib/marketplace/seo";
-import styles from "../../marketplace-pages.module.css";
+import styles from "@/app/marketplace-pages.module.css";
 
 type ProfilePageProps = {
   params: Promise<{ slug: string }>;
