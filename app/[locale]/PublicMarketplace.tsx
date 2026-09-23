@@ -10,7 +10,7 @@ import {
 } from "@/lib/directory/inquiry-context";
 import type { PublicUnit, UnitStatus } from "@/lib/domain/types";
 import { buildWhatsappHref } from "@/lib/marketplace/format";
-import GroupCompanies from "./_components/GroupCompanies";
+import GroupCompanies from "@/app/_components/GroupCompanies";
 
 const GOOGLE_MAPS_URL = "https://share.google/nKy73IM4ruoa1guRK";
 const PRIMARY_PHONE = "0985 864209";

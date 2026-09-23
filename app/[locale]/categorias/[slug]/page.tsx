@@ -18,10 +18,11 @@ import {
 } from "@/lib/marketplace/data";
 import { buildMarketplaceInquiryHref } from "@/lib/marketplace/format";
 import { buildCategoryJsonLd } from "@/lib/marketplace/seo";
-import styles from "../../marketplace-pages.module.css";
+import { setRequestLocale } from "next-intl/server";
+import styles from "@/app/marketplace-pages.module.css";
 
 type CategoryPageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
 export async function generateStaticParams() {
@@ -61,7 +62,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const directory = await getPublicCategoryDirectory((await params).slug);
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+
+  const directory = await getPublicCategoryDirectory(slug);
   if (!directory) notFound();
 
   const { category, profiles, catalogItems, otherCategories, isDemo } = directory;
