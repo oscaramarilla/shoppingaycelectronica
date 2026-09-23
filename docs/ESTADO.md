@@ -1,6 +1,6 @@
 # Estado Actual de shoppingaycelectronica — Torre de Control
 
-> **Fuente de verdad operativa. Última actualización: 2026-09-07.**
+> **Fuente de verdad operativa. Última actualización: 2026-09-23.**
 > Refleja la realidad EXACTA de producción. Si algo acá contradice a otro doc,
 > manda este. Todo agente/LLM lee esto y `AGENTS.md` antes de tocar nada.
 
@@ -19,6 +19,13 @@ El **bot de WhatsApp NO está encendido** (ver §6, freno de mano).
   región São Paulo). RLS activo en todas las tablas + **event trigger de auto-RLS**
   para tablas futuras. 0 políticas = deny-anon; solo `service_role` pasa (intencional).
 * **Dominio:** `www.shoppingaycelectronica.com` (Squarespace → DNS a Vercel), HTTPS.
+* **Idiomas:** `next-intl` con `es` (default), `en`, `pt`. `localePrefix:
+  'as-needed'` ⇒ el español mantiene las URLs actuales sin prefijo (`/categorias/x`)
+  y `/es/...` redirige a la forma canónica; los otros idiomas sí llevan prefijo
+  (`/en/...`, `/pt/...`). Config en `i18n/routing.ts` (sin deps de React, se puede
+  importar desde `lib/` y tests) + `i18n/navigation.ts` + `i18n/request.ts`;
+  diccionarios en `messages/{es,en,pt}.json`. **Hoy solo la metadata está
+  traducida**; el contenido de las páginas sigue en español duro.
 * **WhatsApp:** Kapso. ⚠️ **Realidad hoy: conexión Coexistence** sobre el número
   personal de Oscar `+595 985 864209` (el mismo tráfico personal/comercial). El
   **plan** es una línea dedicada API-only, pero **todavía no existe**. Ver §6.
@@ -124,8 +131,10 @@ migración (aditivo → backfill → cutover del frontend → limpieza) en ese a
 * `/login`: correo + contraseña de Supabase Auth; sesión en cookies `httpOnly`
   vía `@supabase/ssr`. Cualquier usuario autenticado = admin total (roles
   cobrador/admin = fase futura).
-* `proxy.ts` protege `/gestion/*`, `/admin/*`, `/api/admin/*`; los Route Handlers
-  revalidan con `requireUser()`.
+* `proxy.ts` resuelve el idioma (next-intl) **y** protege `/gestion/*`,
+  `/admin/*`, `/api/admin/*`; los Route Handlers revalidan con `requireUser()`.
+  Las rutas protegidas conservan el idioma: `/en/gestion` sin sesión redirige a
+  `/en/login?redirect=/en/gestion`, y `normalizeAdminRedirect()` acepta el prefijo.
 * El panel consulta `GET /api/admin/units`, `GET /api/admin/payments?period=YYYY-MM`,
   `GET /api/admin/inquiries?status=new`; muta con `POST /api/admin/payments`
   (upsert mensual), `PATCH /api/admin/payments/[id]`, `PATCH /api/admin/inquiries/[id]`.
@@ -140,7 +149,9 @@ migración (aditivo → backfill → cutover del frontend → limpieza) en ese a
 `#14` `monthly_rent` nullable · `#15` `pedidoSchema` `.nullish()` · `#16` conteo
 Zully (9) · `#17` endpoint `/inquiries` · `#18` fuente de verdad + integridad de
 datos · `#19` páginas públicas `/locales` y `/categorias` · `#20` sección
-"Grupo AYC" en la portada (publicidad cruzada de las 4 empresas del 2do piso).
+"Grupo AYC" en la portada (publicidad cruzada de las 4 empresas del 2do piso) ·
+`#21` contexto de consulta en la portada · `#22` i18n con next-intl —
+**revertido por el `#24`** (ver §10) · `#23` telemetría de Vercel + contraste WCAG.
 
 ## 10. Tareas Pendientes (WIP)
 
@@ -149,9 +160,20 @@ datos · `#19` páginas públicas `/locales` y `/categorias` · `#20` sección
       `/_vercel/insights/*` y `/_vercel/speed-insights/*` solo existen dentro de
       Vercel; en local dan 404). Los Web Vitals de campo tardan semanas en juntar
       volumen; hoy PageSpeed no tiene datos CrUX.
-* [ ] **(Coordinación PR #22 i18n)** Ese PR borra `app/layout.tsx` y crea
-      `app/[locale]/layout.tsx`. Al mergear, mover `<Analytics />` y
-      `<SpeedInsights />` (más sus dos imports) al `<body>` del layout nuevo.
+* [x] ~~**(Coordinación PR #22 i18n)** mover `<Analytics />` y `<SpeedInsights />`
+      al layout nuevo.~~ Hecho en la reimplementación: `app/[locale]/layout.tsx`
+      ya los monta en el `<body>`. **Contexto: el PR #22 original fue revertido
+      por el #24.** Falló por tres cosas que la reimplementación corrige:
+      (1) el `matcher` sólo cubría `/`, `/(es|en|pt)/:path*` y las rutas admin, así
+      que con `localePrefix: 'as-needed'` **`/categorias/*`, `/locales/*` y `/login`
+      daban 404**; (2) creaba `middleware.ts`, deprecado en Next 16 y que rompe el
+      build si convive con `proxy.ts`; (3) perdía la telemetría de Vercel.
+      **No reintroducir ese `matcher`.**
+* [ ] **(i18n, siguiente paso)** Traducir el contenido de las páginas (hoy sólo
+      la metadata sale de `messages/`) y agregar un selector de idioma usando los
+      helpers de `i18n/navigation.ts`. Pendiente también `alternates.languages`
+      (hreflang) y decidir si se deja la autodetección por `Accept-Language`
+      —hoy activa por defecto— mientras el contenido siga sólo en español.
 * [ ] **(Frontend)** Contraste WCAG en `/locales/*` y `/categorias/*`: quedan 4
       nodos por página en `app/marketplace-pages.module.css` (`.trustStrip span`
       `#c2daff` y `.conversionBand p` `#d1e3ff` sobre `#0066ff`, ~3,4–3,7:1;

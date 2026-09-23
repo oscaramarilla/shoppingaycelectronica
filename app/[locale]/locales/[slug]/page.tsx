@@ -21,10 +21,11 @@ import {
   buildWhatsappHref,
 } from "@/lib/marketplace/format";
 import { buildBusinessProfileJsonLd } from "@/lib/marketplace/seo";
-import styles from "../../marketplace-pages.module.css";
+import { setRequestLocale } from "next-intl/server";
+import styles from "@/app/marketplace-pages.module.css";
 
 type ProfilePageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
 export async function generateStaticParams() {
@@ -67,7 +68,10 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 }
 
 export default async function BusinessProfilePage({ params }: ProfilePageProps) {
-  const detail = await getPublicBusinessProfile((await params).slug);
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+
+  const detail = await getPublicBusinessProfile(slug);
   if (!detail) notFound();
 
   const { profile, category, catalogItems, relatedProfiles } = detail;
